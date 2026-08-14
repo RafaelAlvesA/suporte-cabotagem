@@ -80,6 +80,7 @@ tr.det td{background:#131a28;color:var(--mut);font-size:12px;white-space:pre-wra
 
 <!-- ======== P1 ======== -->
 <div class="page on" id="p1">
+  <div class="filters" id="filtros1"></div>
   <div class="kpis" id="kpiCli"></div>
   <div class="grid">
     <div class="card"><h3>Aguardando retorno por responsável (nstech)</h3><div class="wrap"><canvas id="cResp"></canvas></div></div>
@@ -108,6 +109,7 @@ tr.det td{background:#131a28;color:var(--mut);font-size:12px;white-space:pre-wra
 
 <!-- ======== P6 ======== -->
 <div class="page" id="p6">
+  <div class="note" style="margin-bottom:12px">Esta página vem da planilha de acompanhamento diário, que guarda só os totais de cada dia. Por isso os filtros de técnico, causa e nível não se aplicam aqui — use o seletor de período abaixo.</div>
   <div class="bar">
     <div class="kpis" style="flex:1;margin:0" id="kpiSnap"></div>
   </div>
@@ -124,6 +126,7 @@ tr.det td{background:#131a28;color:var(--mut);font-size:12px;white-space:pre-wra
 
 <!-- ======== P3 ======== -->
 <div class="page" id="p3">
+  <div class="filters" id="filtros3"></div>
   <div class="kpis" id="kpiHist"></div>
   <div class="card"><h3>Fluxo semanal <span style="text-transform:none;letter-spacing:0">· barras = resolvidos por
     <select id="wSplit" style="padding:3px 6px;font-size:12px"><option value="tecnico">técnico</option><option value="instancia">instância</option><option value="nivel">nível</option><option value="prioridade">prioridade</option><option value="sla">SLA</option></select>
@@ -182,6 +185,7 @@ tr.det td{background:#131a28;color:var(--mut);font-size:12px;white-space:pre-wra
   <select class="f" data-f="fNivel"></select><select class="f" data-f="fPrio"></select>
   <select class="f" data-f="fCausa"></select>
   <select class="f" data-f="fTema"></select>
+  <select class="f" data-f="fModulo"></select>
   <select class="f" data-f="fSla"><option value="">SLA: todos</option><option value="ok">Dentro do SLA</option><option value="bad">Fora do SLA</option></select>
   <input class="f" data-f="fHmin" type="number" min="0" step="1" placeholder="horas ≥" style="width:105px">
   <input class="f" data-f="fHmax" type="number" min="0" step="1" placeholder="horas ≤" style="width:105px">
@@ -198,7 +202,32 @@ const idade=d=>d.aberto?dias(d.abertura):null;
 const nome=t=>t.split(' ')[0];
 const ST_NSTECH=['Novo','Em análise','Com dev'];
 const ehMaersk=d=>d.status==='Pendente';
+const rotulos={id:'rotulos',afterDatasetsDraw(c,args,opts){
+ if(!opts||!opts.on)return; const ctx=c.ctx;
+ c.data.datasets.forEach((ds,i)=>{const m=c.getDatasetMeta(i); if(m.hidden)return;
+  const passo=Math.ceil(m.data.length/45);
+  m.data.forEach((pt,j)=>{ if(j%passo)return; const v=ds.data[j]; if(v==null)return;
+   ctx.save(); ctx.font='600 10px -apple-system,Segoe UI,sans-serif';
+   ctx.fillStyle=(typeof ds.borderColor==='string'?ds.borderColor:'#e8ecf4');
+   ctx.textAlign='center'; ctx.textBaseline='bottom';
+   ctx.strokeStyle='rgba(15,20,32,.85)'; ctx.lineWidth=3; ctx.strokeText(v,pt.x,pt.y-4);
+   ctx.fillText(v,pt.x,pt.y-4); ctx.restore();});});}};
+Chart.register(rotulos);
 let charts={};const chart=(id,cfg)=>{if(charts[id])charts[id].destroy();charts[id]=new Chart(document.getElementById(id),cfg)};
+const CLICK={};
+function clicavel(id,vals,campo){CLICK[id]={vals,campo};
+ const cv=document.getElementById(id); if(!cv)return; cv.style.cursor='pointer';
+ if(cv.dataset.lig)return; cv.dataset.lig='1';
+ cv.addEventListener('click',ev=>{
+  const c=charts[id],m=CLICK[id]; if(!c||!m)return;
+  let els=[]; try{els=c.getElementsAtEventForMode(ev,'nearest',{intersect:true},true);}catch(e){return;}
+  if(!els.length)return; const v=m.vals[els[0].index]; if(v===undefined)return;
+  if(m.campo==='status'){ if(stSel.has(v)&&stSel.size===1)stSel=new Set(); else stSel=new Set([v]); }
+  else if(m.campo==='horas'){ const igual=(String(F.fHmin)===String(v[0])&&(String(F.fHmax)===String(v[1])||(v[1]===null&&F.fHmax===''))); 
+    F.fHmin=igual?'':v[0]; F.fHmax=igual?'':(v[1]===null?'':v[1]); }
+  else { F[m.campo]=(F[m.campo]===v?'':v); }
+  sincroniza(); render();
+ });}
 const resp={responsive:true,maintainAspectRatio:false},noLeg={plugins:{legend:{display:false}}};
 const cont=(a,k)=>{const m={};a.forEach(d=>{const v=(typeof k==='function'?k(d):d[k])||'—';m[v]=(m[v]||0)+1});return Object.entries(m).sort((x,y)=>y[1]-x[1])};
 
@@ -209,7 +238,7 @@ document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
   render();});
 
 // ---------- filtros (clonados nas paginas 2 e 4) ----------
-const F={fSit:'',fTec:'',fInst:'',fNivel:'',fPrio:'',fCausa:'',fTema:'',fSla:'',fHmin:'',fHmax:'',fBusca:''};let stSel=new Set();
+const F={fSit:'',fTec:'',fInst:'',fNivel:'',fPrio:'',fCausa:'',fTema:'',fModulo:'',fSla:'',fHmin:'',fHmax:'',fBusca:''};let stSel=new Set();
 const stOpts=uniq('status');
 function montaFiltros(host){
   host.innerHTML=document.getElementById('filtrosHTML').innerHTML;
@@ -229,6 +258,7 @@ function montaFiltros(host){
     if(k==='fPrio')e.innerHTML='<option value="">Prioridade: todas</option>'+uniq('prioridade').map(v=>`<option>${v}</option>`).join('');
     if(k==='fCausa')e.innerHTML='<option value="">Causa: todas</option>'+uniq('causa').map(v=>`<option>${v}</option>`).join('');
     if(k==='fTema')e.innerHTML='<option value="">Tema: todos</option>'+uniq('tema').map(v=>`<option>${v}</option>`).join('');
+    if(k==='fModulo')e.innerHTML='<option value="">Módulo: todos</option>'+uniq('modulo').map(v=>`<option>${v}</option>`).join('');
     e.value=F[k];const h=()=>{F[k]=e.value;sincroniza();render()};e.oninput=h;e.onchange=h;});
   host.querySelector('.limpar').onclick=()=>{Object.keys(F).forEach(k=>F[k]='');stSel=new Set();
     document.querySelectorAll('.ms-panel input').forEach(i=>i.checked=false);sincroniza();render()};
@@ -239,9 +269,10 @@ function sincroniza(){
     h.querySelectorAll('.ms-panel input').forEach(i=>i.checked=stSel.has(i.value));
     h.querySelector('.msBtn').textContent='Status: '+(stSel.size===0||stSel.size===stOpts.length?'todos':stSel.size===1?[...stSel][0]:stSel.size+' selecionados')+' ▾';});
 }
+['filtros1','filtros3'].forEach(i=>montaFiltros(document.getElementById(i)));
 montaFiltros(document.getElementById('filtros2'));montaFiltros(document.getElementById('filtros4'));montaFiltros(document.getElementById('filtros5'));sincroniza();
 const filtrar=()=>DATA.filter(d=>(!F.fSit||(F.fSit==='aberto'?d.aberto:!d.aberto))&&(stSel.size===0||stSel.has(d.status))
- &&(!F.fTec||d.tecnico===F.fTec)&&(!F.fInst||d.instancia===F.fInst)&&(!F.fNivel||d.nivel===F.fNivel)&&(!F.fPrio||d.prioridade===F.fPrio)&&(!F.fCausa||d.causa===F.fCausa)&&(!F.fTema||d.tema===F.fTema)
+ &&(!F.fTec||d.tecnico===F.fTec)&&(!F.fInst||d.instancia===F.fInst)&&(!F.fNivel||d.nivel===F.fNivel)&&(!F.fPrio||d.prioridade===F.fPrio)&&(!F.fCausa||d.causa===F.fCausa)&&(!F.fTema||d.tema===F.fTema)&&(!F.fModulo||(d.modulo||'—')===F.fModulo)
  &&(!F.fSla||(F.fSla==='ok'?d.sla===true:d.sla===false))
  &&(F.fHmin===''||(d.horas!=null&&d.horas>=+F.fHmin))&&(F.fHmax===''||(d.horas!=null&&d.horas<=+F.fHmax))
  &&(!F.fBusca||[d.titulo,d.inc,d.modulo,d.id,d.requerente,d.descricao].join(' ').toLowerCase().includes(F.fBusca.toLowerCase())));
@@ -255,7 +286,8 @@ let manha=true;
 
 // ================= P1 =================
 function renderCliente(){
- const ab=DATA.filter(d=>d.aberto);
+ const F0=filtrar();
+ const ab=F0.filter(d=>d.aberto);
  const ns=ab.filter(d=>!ehMaersk(d)), mk=ab.filter(ehMaersk);
  const novos=ab.filter(d=>d.status==='Novo').length;
  const atr=ab.filter(d=>d.status==='Em análise').length;
@@ -264,8 +296,8 @@ function renderCliente(){
  kpiHTML('kpiCli',[['Total geral',ab.length,'acc'],['nstech',ns.length],['· Novos',novos],
   ['· Em análise',atr],['· Com dev',pla],['Maersk · aguardando usuário',mk.length],
   ['Tickets > 30 dias',v30,v30?'wrn':'']]);
- const cr=cont(ns,d=>nome(d.tecnico)==='Não'?'Sem técnico':nome(d.tecnico));
- chart('cResp',{type:'doughnut',data:{labels:cr.map(x=>x[0]+' ('+x[1]+')'),datasets:[{data:cr.map(x=>x[1]),backgroundColor:PAL,borderWidth:0}]},
+ const cr=cont(ns,'tecnico');
+ chart('cResp',{type:'doughnut',data:{labels:cr.map(x=>(x[0]==='Não atribuído'?'Sem técnico':nome(x[0]))+' ('+x[1]+')'),datasets:[{data:cr.map(x=>x[1]),backgroundColor:PAL,borderWidth:0}]},
   options:{...resp,plugins:{legend:{position:'right'},tooltip:{callbacks:{label:c=>c.parsed+' de '+ns.length+' ('+Math.round(c.parsed/ns.length*100)+'%)'}}}}});
  chart('cLado',{type:'bar',data:{labels:['nstech','Maersk'],datasets:[
    {label:'Novo',data:[novos,0],backgroundColor:'#4f9cf9'},
@@ -274,6 +306,7 @@ function renderCliente(){
    {label:'Aguardando usuário',data:[0,mk.length],backgroundColor:'#ffb020'}]},
   options:{...resp,scales:{x:{stacked:true},y:{stacked:true,ticks:{precision:0}}},plugins:{legend:{position:'bottom'}}}});
 
+ clicavel('cResp',cr.map(x=>x[0]),'fTec');
  const dt=String(REF.getDate()).padStart(2,'0')+'.'+String(REF.getMonth()+1).padStart(2,'0');
  const ordem=[['NOVO','Novo'],['EM ANÁLISE','Em análise'],
    ['COM DEV','Com dev'],['PENDENTES (MAERSK)','Pendente']];
@@ -287,7 +320,7 @@ function renderCliente(){
     const quem=st==='Pendente'?(d.requerente.split('@')[0].split('.')[0].replace(/^./,c=>c.toUpperCase())):(d.tecnico==='Não atribuído'?'definição de responsável':d.tecnico);
     txt+='• '+d.id+' - '+d.titulo+v+' — Aguardando retorno'+(st==='Novo'&&d.tecnico==='Não atribuído'?'':' de '+quem)+'\n';});});
  txt+='\nSegue a visão da distribuição dos tickets por colaborador na data de hoje:\n';
- cr.forEach(([n,q])=>txt+='• '+n+': '+q+' ticket'+(q>1?'s':'')+' ('+Math.round(q/ns.length*100)+'%)\n');
+ cr.forEach(([n0,q])=>{const n=(n0==='Não atribuído'?'Sem técnico':n0); txt+='• '+n+': '+q+' ticket'+(q>1?'s':'')+' ('+Math.round(q/ns.length*100)+'%)\n';});
  document.getElementById('msg').value=txt;
 }
 document.getElementById('btnCopy').onclick=async()=>{const t=document.getElementById('msg');
@@ -312,6 +345,8 @@ function renderFila(){
    {label:'Resolvidos',data:tecs.map(t=>rs.filter(d=>d.tecnico===t).length),backgroundColor:'#4f9cf9'},
    {label:'Em aberto',data:tecs.map(t=>ab.filter(d=>d.tecnico===t).length),backgroundColor:'#a78bfa'}]},
   options:{...resp,scales:{x:{stacked:true},y:{stacked:true,ticks:{precision:0}}},plugins:{legend:{position:'bottom'}}}});
+ clicavel('cSt',cs.map(x=>x[0]),'status');
+ clicavel('cCarga',tecs,'fTec');
  cntAb.textContent=ab.length;
  tAb.innerHTML='<thead><tr><th>ID</th><th>Idade</th><th>Título</th><th>Status</th><th>Prioridade</th><th>Nível</th><th>Técnico</th><th>Instância</th><th>Últ. atualização</th></tr></thead><tbody>'+
   [...ab].sort((a,b)=>idade(b)-idade(a)).map(d=>{const x=idade(d);
@@ -360,10 +395,14 @@ function renderHist(){
  const fx=[['≤4h',0,4],['4–24h',4,24],['1–3d',24,72],['3–7d',72,168],['1–2sem',168,336],['>2sem',336,1e9]];
  chart('cHist',{type:'bar',data:{labels:fx.map(x=>x[0]),datasets:[{data:fx.map(([,a,b])=>hs.filter(h=>h>a&&h<=b).length),backgroundColor:['#2ecc8f','#4f9cf9','#22d3ee','#ffb020','#ff8a4c','#ff5c6c']}]},
   options:{...resp,...noLeg,scales:{y:{ticks:{precision:0}}}}});
+ clicavel('cSla',tecs,'fTec');
+ clicavel('cHist',fx.map(x=>[x[1],x[2]>=1e9?null:x[2]]),'horas');
  const cn=cont(f,'nivel');
  chart('cNiv',{type:'doughnut',data:{labels:cn.map(x=>x[0]),datasets:[{data:cn.map(x=>x[1]),backgroundColor:PAL,borderWidth:0}]},options:{...resp,plugins:{legend:{position:'bottom'}}}});
  const cm=cont(f,'modulo');
  chart('cMod',{type:'bar',data:{labels:cm.map(x=>x[0]),datasets:[{data:cm.map(x=>x[1]),backgroundColor:'#4f9cf9'}]},options:{...resp,...noLeg,indexAxis:'y'}});
+ clicavel('cNiv',cn.map(x=>x[0]),'fNivel');
+ clicavel('cMod',cm.map(x=>x[0]),'fModulo');
 }
 
 // ================= P5 =================
@@ -399,6 +438,10 @@ function renderCausas(){
   options:{...resp,indexAxis:'y',scales:{x:{stacked:true,ticks:{precision:0}},y:{stacked:true}},plugins:{legend:{position:'bottom'}}}});
  chart('cCausaT',{type:'bar',data:{labels:causas,datasets:[{data:causas.map(c=>medOf(g(c))||0),backgroundColor:causas.map(c=>COR[c])}]},
   options:{...resp,...noLeg,indexAxis:'y',scales:{x:{title:{display:true,text:'horas (mediana)'}}}}});
+ clicavel('cCausa',causas,'fCausa');
+ clicavel('cPreench',tecs,'fTec');
+ clicavel('cCausaN',causas,'fCausa');
+ clicavel('cCausaT',causas,'fCausa');
  tCausa.innerHTML='<thead><tr><th>Análise de causa</th><th>Total</th><th>%</th><th>Em aberto</th><th>Tempo mediano</th><th>% no SLA</th><th>Nível dominante</th><th>Instância dominante</th></tr></thead><tbody>'+
   causas.map((c,i)=>{const a=g(c),md=medOf(a),sl=slaOf(a),nv=cont(a,'nivel')[0],ins=cont(a,'instancia')[0];
    return `<tr onclick="var e=document.getElementById('cz${i}');e.style.display=e.style.display==='table-row'?'none':'table-row'" style="cursor:pointer">
@@ -418,6 +461,7 @@ function renderCausas(){
    {label:'Resolvidos',data:ct.map(x=>f.filter(d=>d.tema===x[0]&&!d.aberto).length),backgroundColor:'#4f9cf9'},
    {label:'Em aberto',data:ct.map(x=>f.filter(d=>d.tema===x[0]&&d.aberto).length),backgroundColor:'#a78bfa'}]},
   options:{...resp,indexAxis:'y',scales:{x:{stacked:true,ticks:{precision:0}},y:{stacked:true}},plugins:{legend:{position:'bottom'}}}});
+ clicavel('cTema',ct.map(x=>x[0]),'fTema');
 }
 
 // ================= P6 =================
@@ -436,14 +480,14 @@ function renderSnap(){
    {label:'Total',data:s.map(x=>x.t),borderColor:'#4f9cf9',backgroundColor:'rgba(79,156,249,.12)',fill:true,tension:.3,pointRadius:2,borderWidth:2},
    {label:'nstech',data:s.map(x=>x.ns),borderColor:'#ffb020',pointRadius:2,tension:.3,borderWidth:2},
    {label:'Maersk',data:s.map(x=>x.mk),borderColor:'#2ecc8f',pointRadius:2,tension:.3,borderWidth:2}]},
-  options:{...resp,scales:{y:{beginAtZero:true,ticks:{precision:0}}},plugins:{legend:{position:'bottom'}}}});
+  options:{...resp,scales:{y:{beginAtZero:true,ticks:{precision:0}}},plugins:{legend:{position:'bottom'},rotulos:{on:true}}}});
  chart('cSnapNs',{type:'bar',data:{labels:lbl,datasets:[
    {label:'Novos',data:s.map(x=>x.nv),backgroundColor:'#4f9cf9'},
    {label:'Em análise',data:s.map(x=>x.an),backgroundColor:'#a78bfa'},
    {label:'Com dev',data:s.map(x=>x.dv),backgroundColor:'#22d3ee'}]},
   options:{...resp,scales:{x:{stacked:true},y:{stacked:true,ticks:{precision:0}}},plugins:{legend:{position:'bottom'}}}});
  chart('cSnap30',{type:'line',data:{labels:lbl,datasets:[{data:s.map(x=>x.v30),borderColor:'#ff5c6c',backgroundColor:'rgba(255,92,108,.12)',fill:true,tension:.3,pointRadius:2}]},
-  options:{...resp,...noLeg,scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+  options:{...resp,plugins:{legend:{display:false},rotulos:{on:true}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
  document.getElementById('tSnap').innerHTML='<thead><tr><th>Data</th><th>Hora</th><th>Total geral</th><th>nstech</th><th>· Novos</th><th>· Em análise</th><th>· Com dev</th><th>Maersk</th><th>&gt; 30 dias</th><th>Var.</th></tr></thead><tbody>'+
   [...s].reverse().map((x,i,arr)=>{const ant=arr[i+1],dv=ant?x.t-ant.t:0;
    return `<tr><td>${x.d.split('-').reverse().join('/')}</td><td>${x.h}</td><td><b>${x.t}</b></td><td>${x.ns}</td><td>${x.nv??'—'}</td><td>${x.an??'—'}</td><td>${x.dv??'—'}</td>
@@ -463,6 +507,7 @@ function renderCausaInst(){
    chart(cv,{type:'doughnut',data:{labels:c.map(x=>x[0]+' — '+x[1]+' ('+(g.length?Math.round(x[1]/g.length*100):0)+'%)'),
      datasets:[{data:c.map(x=>x[1]),backgroundColor:c.map(x=>COR[x[0]]||'#8b97ad'),borderWidth:0}]},
     options:{...resp,plugins:{legend:{position:'right',labels:{boxWidth:10}}}}});
+   clicavel(cv,c.map(x=>x[0]),'fCausa');
  });
 }
 document.getElementById('czPer').onchange=renderCausaInst;
