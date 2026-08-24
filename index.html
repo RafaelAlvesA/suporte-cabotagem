@@ -92,7 +92,22 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
     <div><h1>Suporte Cabotagem · Chamados Maersk</h1>
     <div class="sub" id="periodo"></div></div>
   </div>
-  <button id="btnMais" title="Importar planilha do GLPI">+</button>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span id="quemSou" class="sub" style="margin:0"></span>
+    <button id="btnLogin">Entrar para editar</button>
+    <button id="btnMais" title="Importar planilha do GLPI">+</button>
+  </div>
+</div>
+
+<div class="back" id="modalLogin">
+  <div class="modal" style="width:min(400px,100%)">
+    <h2>Entrar</h2>
+    <p>Use o e-mail cadastrado no banco de anotações. Só quem entra consegue editar prioridade e observação.</p>
+    <input id="logEmail" type="email" placeholder="e-mail" style="width:100%;margin-bottom:8px">
+    <input id="logSenha" type="password" placeholder="senha" style="width:100%">
+    <div class="msgbox" id="msgLogin"></div>
+    <div class="acoes"><button id="btnEntrar">Entrar</button><button id="btnCancelaLogin">Cancelar</button></div>
+  </div>
 </div>
 
 <div class="back" id="modalImp">
@@ -230,7 +245,7 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
   <th data-k="id">ID</th><th data-k="titulo">Título</th><th data-k="status">Status</th><th data-k="instancia">Instância</th>
   <th data-k="nivel">Nível</th><th data-k="modulo">Módulo</th><th data-k="causa">Causa</th><th data-k="tema">Tema</th><th data-k="prioridade">Prioridade</th>
   <th data-k="tecnico">Técnico</th><th data-k="abertura">Abertura</th><th data-k="solucao">Finalização</th>
-  <th data-k="horas">Horas</th><th data-k="sla">SLA</th></tr></thead><tbody></tbody></table></div></div>
+  <th data-k="horas">Horas</th><th data-k="sla">SLA</th><th>Prioridade equipe</th><th>Observação</th></tr></thead><tbody></tbody></table></div></div>
 </div>
 
 <div id="filtrosHTML" style="display:none">
@@ -419,13 +434,14 @@ function renderFila(){
  clicavel('cSt',cs.map(x=>x[0]),'status');
  clicavel('cCarga',tecs,'fTec');
  cntAb.textContent=ab.length;
- tAb.innerHTML='<thead><tr><th>ID</th><th>Idade</th><th>Título</th><th>Status</th><th>Prioridade</th><th>Solicitante</th><th>Técnico</th><th>Instância</th><th>Últ. atualização</th></tr></thead><tbody>'+
+ tAb.innerHTML='<thead><tr><th>ID</th><th>Idade</th><th>Título</th><th>Status</th><th>Prioridade</th><th>Solicitante</th><th>Técnico</th><th>Instância</th><th>Prioridade equipe</th><th>Observação</th><th>Últ. atualização</th></tr></thead><tbody>'+
   [...ab].sort((a,b)=>idade(b)-idade(a)).map(d=>{const x=idade(d);
    return `<tr><td>${d.id}</td><td><span class="tag ${x>30?'bad':x>14?'hi':'md'}">${x}d</span></td><td>${d.titulo}</td>
    <td><span class="tag ${d.status==='Pendente'?'hi':'op'}">${d.status}</span></td>
    <td><span class="tag ${['Critica','Muito alta'].includes(d.prioridade)?'bad':d.prioridade==='Alta'?'hi':'md'}">${d.prioridade}</span></td>
    <td>${(d.requerente||'—').split('@')[0]}</td><td>${d.tecnico==='Não atribuído'?'<span style="color:#e02424">sem técnico</span>':nome(d.tecnico)}</td>
-   <td>${d.instancia}</td><td>${d.atualizacao||''} <span style="color:#8aa2bd">(${dias(d.atualizacao||d.abertura)}d)</span></td></tr>`}).join('')+'</tbody>';
+   <td>${d.instancia}</td>`+celulaPrio(d.id)+celulaObs(d.id)+`<td>${d.atualizacao||''} <span style="color:#8aa2bd">(${dias(d.atualizacao||d.abertura)}d)</span></td></tr>`}).join('')+'</tbody>';
+ ligaAnotacoes();
 }
 
 // ================= P3 =================
@@ -512,7 +528,7 @@ function renderCausas(){
    return `<tr><td>${d.id}</td><td>${d.solucao}</td><td>${dd}d</td><td>${d.titulo}</td>
    <td>${d.tecnico==='Não atribuído'?'<span style="color:#e02424">sem técnico</span>':nome(d.tecnico)}</td>
    <td>${d.instancia}</td><td>${d.horas!=null?d.horas.toFixed(1):'—'}</td>
-   <td><span class="tag ${d.sla===null?'nu':d.sla?'ok':'bad'}">${d.sla===null?'—':d.sla?'dentro':'fora'}</span></td></tr>`}).join('')+'</tbody>';
+   <td><span class="tag ${d.sla===null?'nu':d.sla?'ok':'bad'}">${d.sla===null?'—':d.sla?'dentro':'fora'}</span></td>`+celulaPrio(d.id)+celulaObs(d.id)+`</tr>`}).join('')+'</tbody>';
  window.__semCausa=semCausa;
  chart('cCausa',{type:'doughnut',data:{labels:causas.map(c=>c+' ('+g(c).length+')'),datasets:[{data:causas.map(c=>g(c).length),backgroundColor:causas.map(c=>COR[c]),borderWidth:0}]},
   options:{...resp,plugins:{legend:{position:'right'}}}});
@@ -707,11 +723,12 @@ function renderTabela(){
    <td>${d.solucao||'<span style="color:#8aa2bd">—</span>'}</td>
    <td>${d.horas!=null?d.horas.toFixed(1):'<span style="color:#7aa7ff">'+idade(d)+'d aberto</span>'}</td>
    <td><span class="tag ${d.sla===null?'nu':d.sla?'ok':'bad'}">${d.sla===null?'—':d.sla?'dentro':'fora'}</span></td></tr>
-  <tr class="det" id="d${i}" style="display:none"><td colspan="14"><b>${d.inc||''}</b> ${d.versao} · ${d.requerente} · SLA: ${d.sla_nome||'—'} · prazo ${d.prazo||'—'} · últ. atualização ${d.atualizacao||'—'}${d.justificativa?'\n\nJustificativa de causa: '+d.justificativa:''}\n\n${(d.descricao||'sem descrição').replace(/</g,'&lt;')}</td></tr>`).join('');
+  <tr class="det" id="d${i}" style="display:none"><td colspan="16"><b>${d.inc||''}</b> ${d.versao} · ${d.requerente} · SLA: ${d.sla_nome||'—'} · prazo ${d.prazo||'—'} · últ. atualização ${d.atualizacao||'—'}${d.justificativa?'\n\nJustificativa de causa: '+d.justificativa:''}\n\n${(d.descricao||'sem descrição').replace(/</g,'&lt;')}</td></tr>`).join('');
 }
 document.querySelectorAll('#tbl th').forEach(th=>{th.dataset.base=th.textContent;
  th.onclick=()=>{const k=th.dataset.k;sortD=(k===sortK)?-sortD:1;sortK=k;
-  document.querySelectorAll('#tbl th').forEach(x=>x.textContent=x.dataset.base);
+  ligaAnotacoes();
+ document.querySelectorAll('#tbl th').forEach(x=>x.textContent=x.dataset.base);
   th.textContent=th.dataset.base+(sortD>0?' ▲':' ▼');renderTabela()};});
 document.getElementById('wSplit').onchange=render;
 
@@ -720,6 +737,70 @@ function render(){const p=document.querySelector('.page.on').id;
 function cabecalho(){const dsx=DATA.map(d=>d.abertura).filter(Boolean).sort();
  periodo.textContent=`${DATA.length} chamados · ${DATA.filter(d=>d.aberto).length} em aberto · abertura de ${dsx[0].slice(0,10)} a ${dsx[dsx.length-1].slice(0,10)} · última movimentação no GLPI em ${RAW.ref}`;}
 cabecalho();
+
+/* ===================== ANOTAÇÕES (Supabase) ===================== */
+/* Preencha depois de criar o projeto — veja BANCO-ANOTACOES.md */
+const SUP={url:'https://auykueeenrdlagwponbl.supabase.co',anon:'sb_publishable_8lWbT57bIdf9jgBHvHQrPA_nT54o4Tb'};
+let SESSAO=null, ANOT={};
+const supOn=()=>!!(SUP.url&&SUP.anon);
+const supHead=()=>({'apikey':SUP.anon,'Authorization':'Bearer '+((SESSAO&&SESSAO.access_token)||SUP.anon),'Content-Type':'application/json'});
+const podeEditar=()=>supOn()&&!!SESSAO;
+async function supCarregar(){
+ if(!supOn())return;
+ try{const r=await fetch(SUP.url+'/rest/v1/anotacoes?select=chamado_id,prioridade,observacao',{headers:supHead()});
+  if(!r.ok)return; ANOT={}; (await r.json()).forEach(x=>ANOT[x.chamado_id]={prioridade:x.prioridade||'',observacao:x.observacao||''});
+ }catch(e){console.warn('anotações não carregaram',e);}}
+async function supSalvar(id,campo,valor){
+ if(!podeEditar())return false;
+ const atual=ANOT[id]||{prioridade:'',observacao:''}; atual[campo]=valor; ANOT[id]=atual;
+ const corpo=[{chamado_id:id,prioridade:atual.prioridade,observacao:atual.observacao,atualizado_por:(SESSAO&&SESSAO.email)||''}];
+ try{const r=await fetch(SUP.url+'/rest/v1/anotacoes?on_conflict=chamado_id',
+   {method:'POST',headers:Object.assign(supHead(),{'Prefer':'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(corpo)});
+  return r.ok;}catch(e){return false;}}
+async function supLogin(email,senha){
+ const r=await fetch(SUP.url+'/auth/v1/token?grant_type=password',
+  {method:'POST',headers:{'apikey':SUP.anon,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:senha})});
+ if(!r.ok)throw new Error((await r.json()).error_description||'e-mail ou senha inválidos');
+ const d=await r.json(); SESSAO={access_token:d.access_token,email:(d.user&&d.user.email)||email};
+ try{localStorage.setItem('sup_sessao',JSON.stringify(SESSAO));}catch(e){}
+ return SESSAO;}
+function supRestaurar(){try{const s=localStorage.getItem('sup_sessao'); if(s)SESSAO=JSON.parse(s);}catch(e){}}
+function marcaSessao(){
+ const q=document.getElementById('quemSou'), b=document.getElementById('btnLogin');
+ if(!supOn()){q.textContent='';b.style.display='none';return;}
+ if(SESSAO){q.textContent=SESSAO.email;b.textContent='Sair';}
+ else{q.textContent='';b.textContent='Entrar para editar';}}
+const anot=(id,c)=>((ANOT[id]||{})[c]||'');
+const PRIOS=['','P0','P1','P2','P3','P4','P5','Crítica'];
+function celulaPrio(id){
+ if(!podeEditar())return `<td>${anot(id,'prioridade')||'<span style="color:var(--mut)">—</span>'}</td>`;
+ return `<td><select data-anot="prioridade" data-id="${id}" onclick="event.stopPropagation()" style="padding:3px 6px;font-size:12px">`+
+  PRIOS.map(p=>`<option value="${p}"${anot(id,'prioridade')===p?' selected':''}>${p||'—'}</option>`).join('')+'</select></td>';}
+function celulaObs(id){
+ const v=anot(id,'observacao');
+ if(!podeEditar())return `<td>${v?v.replace(/</g,'&lt;'):'<span style="color:var(--mut)">—</span>'}</td>`;
+ return `<td><input data-anot="observacao" data-id="${id}" value="${v.replace(/"/g,'&quot;')}" placeholder="anotar…" onclick="event.stopPropagation()" style="width:170px;padding:3px 6px;font-size:12px"></td>`;}
+function ligaAnotacoes(){
+ document.querySelectorAll('[data-anot]').forEach(el=>{
+  if(el.dataset.lig)return; el.dataset.lig='1';
+  const salvar=async()=>{const ok=await supSalvar(el.dataset.id,el.dataset.anot,el.value);
+    el.style.borderColor=ok?'var(--ok)':'var(--bad)'; setTimeout(()=>el.style.borderColor='',1200);};
+  el.addEventListener('change',salvar);
+  if(el.tagName==='INPUT')el.addEventListener('blur',salvar);});}
+
+document.getElementById('btnLogin').onclick=()=>{
+ if(SESSAO){SESSAO=null;try{localStorage.removeItem('sup_sessao');}catch(e){} marcaSessao();render();return;}
+ document.getElementById('msgLogin').className='msgbox';
+ document.getElementById('modalLogin').classList.add('open');};
+document.getElementById('btnCancelaLogin').onclick=()=>document.getElementById('modalLogin').classList.remove('open');
+document.getElementById('btnEntrar').onclick=async()=>{
+ const m=document.getElementById('msgLogin');
+ try{m.className='msgbox info';m.textContent='Entrando…';
+  await supLogin(document.getElementById('logEmail').value.trim(),document.getElementById('logSenha').value);
+  document.getElementById('logSenha').value='';
+  document.getElementById('modalLogin').classList.remove('open');
+  marcaSessao(); await supCarregar(); render();
+ }catch(e){m.className='msgbox err';m.textContent=e.message;}};
 
 /* ===================== IMPORTAR PLANILHA ===================== */
 function parseCSV(txt){
@@ -851,5 +932,7 @@ btnBx.onclick=()=>{
 
 /* garante que o dia de hoje entre no histórico já na abertura, sem mexer nos anteriores */
 mesclarHist(serieGLPI(DATA));
+supRestaurar(); marcaSessao();
 render();
+if(supOn())supCarregar().then(()=>render());
 </script></body></html>
