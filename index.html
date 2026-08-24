@@ -59,6 +59,8 @@ tr.det td{background:#0d1e30;color:var(--mut);font-size:12px;white-space:pre-wra
 td.obs{white-space:pre-wrap;min-width:260px;word-break:break-word;font-size:12.5px;line-height:1.4}
 #tAb td.obs,#tAb th.obs{width:34%}
 .scroll{max-height:340px;overflow:auto}.tbl-wrap{overflow-x:auto}
+.scroll-alto{max-height:calc(100vh - 190px);overflow:auto}
+.scroll-alto thead th{position:sticky;top:0;z-index:5;background:var(--card)}
 .ms{position:relative;display:inline-block}.ms>button{min-width:150px;text-align:left}
 .ms-panel{display:none;position:absolute;z-index:50;top:calc(100% + 4px);left:0;min-width:240px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
 .ms-panel.open{display:block}
@@ -168,7 +170,7 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
     <div class="card"><h3>Carga por técnico (aberto × resolvido)</h3><div class="wrap"><canvas id="cCarga"></canvas></div></div>
   </div>
   <div class="card"><h3>Chamados em aberto (<span id="cntAb"></span>) · ordenados por idade</h3>
-    <div class="scroll tbl-wrap"><table id="tAb"></table></div></div>
+    <div class="scroll-alto tbl-wrap"><table id="tAb"></table></div></div>
 </div>
 
 <!-- ======== P6 ======== -->
