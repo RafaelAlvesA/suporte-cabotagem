@@ -442,13 +442,18 @@ function renderFila(){
  clicavel('cSt',cs.map(x=>x[0]),'status');
  clicavel('cCarga',tecs,'fTec');
  cntAb.textContent=ab.length;
- tAb.innerHTML='<thead><tr><th>ID</th><th>Idade</th><th>Título</th><th>Status</th><th>Prioridade</th><th>Solicitante</th><th>Técnico</th><th>Instância</th><th>Prioridade equipe</th><th class="obs">Observação</th></tr></thead><tbody>'+
-  [...ab].sort((a,b)=>idade(b)-idade(a)).map(d=>{const x=idade(d);
+ const COLS_FILA=[['id','ID'],['idade','Idade'],['titulo','Título'],['status','Status'],['prioridade','Prioridade'],
+  ['requerente','Solicitante'],['tecnico','Técnico'],['instancia','Instância'],['anotPrio','Prioridade equipe'],['anotObs','Observação']];
+ tAb.innerHTML='<thead><tr>'+COLS_FILA.map(([k,rot])=>
+   `<th data-k="${k}"${k==='anotObs'?' class="obs"':''} style="cursor:pointer">${rot}${ordA===k?(dirA>0?' ▲':' ▼'):''}</th>`).join('')+'</tr></thead><tbody>'+
+  [...ab].sort(comparador(valFila,dirA)).map(d=>{const x=idade(d);
    return `<tr><td>${d.id}</td><td><span class="tag ${x>30?'bad':x>14?'hi':'md'}">${x}d</span></td><td>${d.titulo}</td>
    <td><span class="tag ${d.status==='Pendente'?'hi':'op'}">${d.status}</span></td>
    <td>${tagPrio(d.prioridade)}</td>
    <td>${(d.requerente||'—').split('@')[0]}</td><td>${d.tecnico==='Não atribuído'?'<span style="color:#e02424">sem técnico</span>':nome(d.tecnico)}</td>
    <td>${d.instancia}</td>`+celulaPrio(d.id)+celulaObs(d.id)+`</tr>`}).join('')+'</tbody>';
+ tAb.querySelectorAll('thead th').forEach(th=>th.onclick=()=>{
+   const k=th.dataset.k; dirA=(k===ordA)?-dirA:(k==='idade'?-1:1); ordA=k; renderFila();});
  ligaAnotacoes();
 }
 
@@ -719,12 +724,7 @@ function renderTabela(){
    :sortK==='anotPrio'?rankPrio(anot(d.id,'prioridade'))
    :sortK==='anotObs'?anot(d.id,'observacao')
    :d[sortK];
- const s=[...f].sort((a,b)=>{const x=val(a),y=val(b);
-   const vazio=v=>v==null||v==='';
-   if(vazio(x)&&vazio(y))return 0; if(vazio(x))return 1; if(vazio(y))return -1;
-   if(typeof x==='number'&&typeof y==='number')return (x-y)*sortD;
-   if(typeof x==='boolean'&&typeof y==='boolean')return ((x?1:0)-(y?1:0))*sortD;
-   return String(x).localeCompare(String(y),'pt-BR',{numeric:true})*sortD;});
+ const s=[...f].sort(comparador(val,sortD));
  document.querySelector('#tbl tbody').innerHTML=s.map((d,i)=>`
   <tr onclick="var e=document.getElementById('d${i}');e.style.display=e.style.display==='table-row'?'none':'table-row'">
    <td>${d.id}</td><td>${d.titulo}</td><td><span class="tag ${d.aberto?(d.status==='Pendente'?'hi':'op'):'nu'}">${d.status}</span></td>
@@ -810,6 +810,21 @@ const CLASSE_PRIO={'Critica':'p1','Crítica':'p1','Muito alta':'p2','Alta':'p3',
  'P0':'p1','P1':'p2','P2':'p3','P3':'p4','P4':'p5','P5':'p6'};
 const tagPrio=v=>v?`<span class="tag ${CLASSE_PRIO[v]||'nu'}">${v}</span>`:'<span style="color:var(--mut)">—</span>';
 const RANK_PRIO={'Crítica':0,'Critica':0,'P0':1,'P1':2,'P2':3,'P3':4,'P4':5,'P5':6};
+const RANK_GLPI={'Critica':0,'Crítica':0,'Muito alta':1,'Alta':2,'Média':3,'Media':3,'Baixa':4};
+const rankGlpi=v=>v in RANK_GLPI?RANK_GLPI[v]:null;
+function comparador(val,dir){return (a,b)=>{const x=val(a),y=val(b);
+ const vazio=v=>v==null||v==='';
+ if(vazio(x)&&vazio(y))return 0; if(vazio(x))return 1; if(vazio(y))return -1;
+ if(typeof x==='number'&&typeof y==='number')return (x-y)*dir;
+ if(typeof x==='boolean'&&typeof y==='boolean')return ((x?1:0)-(y?1:0))*dir;
+ return String(x).localeCompare(String(y),'pt-BR',{numeric:true})*dir;};}
+let ordA='idade', dirA=-1;   /* ordenação da fila em aberto */
+const valFila=d=>ordA==='idade'?idade(d)
+ :ordA==='prioridade'?rankGlpi(d.prioridade)
+ :ordA==='anotPrio'?rankPrio(anot(d.id,'prioridade'))
+ :ordA==='anotObs'?anot(d.id,'observacao')
+ :ordA==='requerente'?(d.requerente||'').split('@')[0]
+ :d[ordA];
 const rankPrio=v=>v in RANK_PRIO?RANK_PRIO[v]:null;  /* sem prioridade fica sempre no fim */
 const PRIOS=['','P0','P1','P2','P3','P4','P5','Crítica'];
 function celulaPrio(id){
