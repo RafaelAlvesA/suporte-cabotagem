@@ -49,7 +49,13 @@ tr.det td{background:#0d1e30;color:var(--mut);font-size:12px;white-space:pre-wra
 .tag{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600}
 .ok{background:rgba(33,181,115,.14);color:var(--ok)}.bad{background:rgba(224,36,36,.14);color:var(--bad)}
 .hi{background:rgba(255,159,28,.16);color:var(--warn)}.md{background:rgba(47,111,237,.16);color:var(--ac)}
-.op{background:rgba(122,167,255,.18);color:var(--rx)}.nu{background:#16304a;color:var(--mut)}
+.op{background:rgba(122,167,255,.18);color:var(--rx)}
+.p1{background:rgba(224,36,36,.20);color:#ff6b6b}
+.p2{background:rgba(255,87,34,.20);color:#ff8a4c}
+.p3{background:rgba(255,122,41,.18);color:#ffa259}
+.p4{background:rgba(255,193,7,.18);color:#ffcc4d}
+.p5{background:rgba(180,200,60,.18);color:#c9d94f}
+.p6{background:rgba(33,181,115,.18);color:#4ad295}.nu{background:#16304a;color:var(--mut)}
 td.obs{white-space:pre-wrap;max-width:260px;word-break:break-word}
 .scroll{max-height:340px;overflow:auto}.tbl-wrap{overflow-x:auto}
 .ms{position:relative;display:inline-block}.ms>button{min-width:150px;text-align:left}
@@ -246,7 +252,7 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
   <th data-k="id">ID</th><th data-k="titulo">Título</th><th data-k="status">Status</th><th data-k="instancia">Instância</th>
   <th data-k="nivel">Nível</th><th data-k="modulo">Módulo</th><th data-k="causa">Causa</th><th data-k="tema">Tema</th><th data-k="prioridade">Prioridade</th>
   <th data-k="tecnico">Técnico</th><th data-k="abertura">Abertura</th><th data-k="solucao">Finalização</th>
-  <th data-k="horas">Horas</th><th data-k="sla">SLA</th><th>Prioridade equipe</th><th>Observação</th></tr></thead><tbody></tbody></table></div></div>
+  <th data-k="horas">Horas</th><th data-k="sla">SLA</th><th data-k="anotPrio">Prioridade equipe</th><th data-k="anotObs">Observação</th></tr></thead><tbody></tbody></table></div></div>
 </div>
 
 <div id="filtrosHTML" style="display:none">
@@ -439,7 +445,7 @@ function renderFila(){
   [...ab].sort((a,b)=>idade(b)-idade(a)).map(d=>{const x=idade(d);
    return `<tr><td>${d.id}</td><td><span class="tag ${x>30?'bad':x>14?'hi':'md'}">${x}d</span></td><td>${d.titulo}</td>
    <td><span class="tag ${d.status==='Pendente'?'hi':'op'}">${d.status}</span></td>
-   <td><span class="tag ${['Critica','Muito alta'].includes(d.prioridade)?'bad':d.prioridade==='Alta'?'hi':'md'}">${d.prioridade}</span></td>
+   <td>${tagPrio(d.prioridade)}</td>
    <td>${(d.requerente||'—').split('@')[0]}</td><td>${d.tecnico==='Não atribuído'?'<span style="color:#e02424">sem técnico</span>':nome(d.tecnico)}</td>
    <td>${d.instancia}</td>`+celulaPrio(d.id)+celulaObs(d.id)+`<td>${d.atualizacao||''} <span style="color:#8aa2bd">(${dias(d.atualizacao||d.abertura)}d)</span></td></tr>`}).join('')+'</tbody>';
  ligaAnotacoes();
@@ -708,7 +714,10 @@ document.getElementById('scCopiar').onclick=async()=>{
 let sortK='abertura',sortD=-1;
 function renderTabela(){
  const f=filtrar();cnt.textContent=f.length;
- const val=d=>sortK==='horas'?(d.horas!=null?d.horas:idade(d)*24):d[sortK];
+ const val=d=>sortK==='horas'?(d.horas!=null?d.horas:idade(d)*24)
+   :sortK==='anotPrio'?rankPrio(anot(d.id,'prioridade'))
+   :sortK==='anotObs'?anot(d.id,'observacao')
+   :d[sortK];
  const s=[...f].sort((a,b)=>{const x=val(a),y=val(b);
    const vazio=v=>v==null||v==='';
    if(vazio(x)&&vazio(y))return 0; if(vazio(x))return 1; if(vazio(y))return -1;
@@ -719,7 +728,7 @@ function renderTabela(){
   <tr onclick="var e=document.getElementById('d${i}');e.style.display=e.style.display==='table-row'?'none':'table-row'">
    <td>${d.id}</td><td>${d.titulo}</td><td><span class="tag ${d.aberto?(d.status==='Pendente'?'hi':'op'):'nu'}">${d.status}</span></td>
    <td>${d.instancia}</td><td>${d.nivel}</td><td>${d.modulo||'—'}</td><td>${d.causa==='Não preenchida'?'<span style="color:#4a5f7a">—</span>':d.causa}</td><td>${d.tema}</td>
-   <td><span class="tag ${['Critica','Muito alta'].includes(d.prioridade)?'bad':d.prioridade==='Alta'?'hi':'md'}">${d.prioridade}</span></td>
+   <td>${tagPrio(d.prioridade)}</td>
    <td>${nome(d.tecnico)}</td><td>${d.abertura}</td>
    <td>${d.solucao||'<span style="color:#8aa2bd">—</span>'}</td>
    <td>${d.horas!=null?d.horas.toFixed(1):'<span style="color:#7aa7ff">'+idade(d)+'d aberto</span>'}</td>
@@ -772,9 +781,15 @@ function marcaSessao(){
  if(SESSAO){q.textContent=SESSAO.email;b.textContent='Sair';}
  else{q.textContent='';b.textContent='Entrar para editar';}}
 const anot=(id,c)=>((ANOT[id]||{})[c]||'');
+/* escala vermelho -> verde conforme a severidade */
+const CLASSE_PRIO={'Critica':'p1','Crítica':'p1','Muito alta':'p2','Alta':'p3','Média':'p4','Media':'p4','Baixa':'p6',
+ 'P0':'p1','P1':'p2','P2':'p3','P3':'p4','P4':'p5','P5':'p6'};
+const tagPrio=v=>v?`<span class="tag ${CLASSE_PRIO[v]||'nu'}">${v}</span>`:'<span style="color:var(--mut)">—</span>';
+const RANK_PRIO={'Crítica':0,'Critica':0,'P0':1,'P1':2,'P2':3,'P3':4,'P4':5,'P5':6};
+const rankPrio=v=>v in RANK_PRIO?RANK_PRIO[v]:null;  /* sem prioridade fica sempre no fim */
 const PRIOS=['','P0','P1','P2','P3','P4','P5','Crítica'];
 function celulaPrio(id){
- if(!podeEditar())return `<td>${anot(id,'prioridade')||'<span style="color:var(--mut)">—</span>'}</td>`;
+ if(!podeEditar())return `<td>${tagPrio(anot(id,'prioridade'))}</td>`;
  return `<td><select data-anot="prioridade" data-id="${id}" onclick="event.stopPropagation()" style="padding:3px 6px;font-size:12px">`+
   PRIOS.map(p=>`<option value="${p}"${anot(id,'prioridade')===p?' selected':''}>${p||'—'}</option>`).join('')+'</select></td>';}
 const escapaTexto=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
