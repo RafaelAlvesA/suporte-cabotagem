@@ -754,25 +754,48 @@ cabecalho();
 const SUP={url:'https://auykueeenrdlagwponbl.supabase.co',anon:'sb_publishable_8lWbT57bIdf9jgBHvHQrPA_nT54o4Tb'};
 let SESSAO=null, ANOT={};
 const supOn=()=>!!(SUP.url&&SUP.anon);
-const supHead=()=>({'apikey':SUP.anon,'Authorization':'Bearer '+((SESSAO&&SESSAO.access_token)||SUP.anon),'Content-Type':'application/json'});
+/* sem sessão vai só com a apikey: mandar a chave publicável no Authorization faz o servidor recusar */
+const supHead=()=>{const h={'apikey':SUP.anon,'Content-Type':'application/json'};
+ if(SESSAO&&SESSAO.access_token)h['Authorization']='Bearer '+SESSAO.access_token;
+ return h;};
+async function supRenovar(){
+ if(!(SESSAO&&SESSAO.refresh_token))return false;
+ try{const r=await fetch(SUP.url+'/auth/v1/token?grant_type=refresh_token',
+   {method:'POST',headers:{'apikey':SUP.anon,'Content-Type':'application/json'},
+    body:JSON.stringify({refresh_token:SESSAO.refresh_token})});
+  if(!r.ok)return false;
+  const d=await r.json();
+  SESSAO={access_token:d.access_token,refresh_token:d.refresh_token,email:(d.user&&d.user.email)||SESSAO.email};
+  try{localStorage.setItem('sup_sessao',JSON.stringify(SESSAO));}catch(e){}
+  return true;}catch(e){return false;}}
+function encerraSessao(){SESSAO=null;try{localStorage.removeItem('sup_sessao');}catch(e){} marcaSessao();}
 const podeEditar=()=>supOn()&&!!SESSAO;
-async function supCarregar(){
+async function supCarregar(tentou){
  if(!supOn())return;
  try{const r=await fetch(SUP.url+'/rest/v1/anotacoes?select=chamado_id,prioridade,observacao',{headers:supHead()});
+  if(r.status===401||r.status===403){
+    if(!tentou&&await supRenovar())return supCarregar(true);
+    encerraSessao();
+    const r2=await fetch(SUP.url+'/rest/v1/anotacoes?select=chamado_id,prioridade,observacao',{headers:supHead()});
+    if(!r2.ok)return; ANOT={}; (await r2.json()).forEach(x=>ANOT[x.chamado_id]={prioridade:x.prioridade||'',observacao:x.observacao||''});
+    return;}
   if(!r.ok)return; ANOT={}; (await r.json()).forEach(x=>ANOT[x.chamado_id]={prioridade:x.prioridade||'',observacao:x.observacao||''});
  }catch(e){console.warn('anotações não carregaram',e);}}
-async function supSalvar(id,campo,valor){
+async function supSalvar(id,campo,valor,tentou){
  if(!podeEditar())return false;
  const atual=ANOT[id]||{prioridade:'',observacao:''}; atual[campo]=valor; ANOT[id]=atual;
  const corpo=[{chamado_id:id,prioridade:atual.prioridade,observacao:atual.observacao,atualizado_por:(SESSAO&&SESSAO.email)||''}];
  try{const r=await fetch(SUP.url+'/rest/v1/anotacoes?on_conflict=chamado_id',
    {method:'POST',headers:Object.assign(supHead(),{'Prefer':'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(corpo)});
+  if((r.status===401||r.status===403)&&!tentou){
+    if(await supRenovar())return supSalvar(id,campo,valor,true);
+    encerraSessao(); alert('Sua sessão expirou. Entre de novo para continuar editando.'); render(); return false;}
   return r.ok;}catch(e){return false;}}
 async function supLogin(email,senha){
  const r=await fetch(SUP.url+'/auth/v1/token?grant_type=password',
   {method:'POST',headers:{'apikey':SUP.anon,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:senha})});
  if(!r.ok)throw new Error((await r.json()).error_description||'e-mail ou senha inválidos');
- const d=await r.json(); SESSAO={access_token:d.access_token,email:(d.user&&d.user.email)||email};
+ const d=await r.json(); SESSAO={access_token:d.access_token,refresh_token:d.refresh_token,email:(d.user&&d.user.email)||email};
  try{localStorage.setItem('sup_sessao',JSON.stringify(SESSAO));}catch(e){}
  return SESSAO;}
 function supRestaurar(){try{const s=localStorage.getItem('sup_sessao'); if(s)SESSAO=JSON.parse(s);}catch(e){}}
@@ -807,7 +830,7 @@ function ligaAnotacoes(){
   if(el.tagName!=='SELECT')el.addEventListener('blur',salvar);});}
 
 document.getElementById('btnLogin').onclick=()=>{
- if(SESSAO){SESSAO=null;try{localStorage.removeItem('sup_sessao');}catch(e){} marcaSessao();render();return;}
+ if(SESSAO){encerraSessao();supCarregar().then(()=>render());return;}
  document.getElementById('msgLogin').className='msgbox';
  document.getElementById('modalLogin').classList.add('open');};
 document.getElementById('btnCancelaLogin').onclick=()=>document.getElementById('modalLogin').classList.remove('open');
@@ -952,5 +975,6 @@ btnBx.onclick=()=>{
 mesclarHist(serieGLPI(DATA));
 supRestaurar(); marcaSessao();
 render();
-if(supOn())supCarregar().then(()=>render());
+if(supOn()){supCarregar().then(()=>render());
+ setInterval(()=>{if(SESSAO)supRenovar();},1000*60*30);}
 </script></body></html>
