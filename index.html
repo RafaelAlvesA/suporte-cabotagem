@@ -50,6 +50,7 @@ tr.det td{background:#0d1e30;color:var(--mut);font-size:12px;white-space:pre-wra
 .ok{background:rgba(33,181,115,.14);color:var(--ok)}.bad{background:rgba(224,36,36,.14);color:var(--bad)}
 .hi{background:rgba(255,159,28,.16);color:var(--warn)}.md{background:rgba(47,111,237,.16);color:var(--ac)}
 .op{background:rgba(122,167,255,.18);color:var(--rx)}.nu{background:#16304a;color:var(--mut)}
+td.obs{white-space:pre-wrap;max-width:260px;word-break:break-word}
 .scroll{max-height:340px;overflow:auto}.tbl-wrap{overflow-x:auto}
 .ms{position:relative;display:inline-block}.ms>button{min-width:150px;text-align:left}
 .ms-panel{display:none;position:absolute;z-index:50;top:calc(100% + 4px);left:0;min-width:240px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
@@ -528,7 +529,7 @@ function renderCausas(){
    return `<tr><td>${d.id}</td><td>${d.solucao}</td><td>${dd}d</td><td>${d.titulo}</td>
    <td>${d.tecnico==='Não atribuído'?'<span style="color:#e02424">sem técnico</span>':nome(d.tecnico)}</td>
    <td>${d.instancia}</td><td>${d.horas!=null?d.horas.toFixed(1):'—'}</td>
-   <td><span class="tag ${d.sla===null?'nu':d.sla?'ok':'bad'}">${d.sla===null?'—':d.sla?'dentro':'fora'}</span></td>`+celulaPrio(d.id)+celulaObs(d.id)+`</tr>`}).join('')+'</tbody>';
+   <td><span class="tag ${d.sla===null?'nu':d.sla?'ok':'bad'}">${d.sla===null?'—':d.sla?'dentro':'fora'}</span></td></tr>`}).join('')+'</tbody>';
  window.__semCausa=semCausa;
  chart('cCausa',{type:'doughnut',data:{labels:causas.map(c=>c+' ('+g(c).length+')'),datasets:[{data:causas.map(c=>g(c).length),backgroundColor:causas.map(c=>COR[c]),borderWidth:0}]},
   options:{...resp,plugins:{legend:{position:'right'}}}});
@@ -722,7 +723,7 @@ function renderTabela(){
    <td>${nome(d.tecnico)}</td><td>${d.abertura}</td>
    <td>${d.solucao||'<span style="color:#8aa2bd">—</span>'}</td>
    <td>${d.horas!=null?d.horas.toFixed(1):'<span style="color:#7aa7ff">'+idade(d)+'d aberto</span>'}</td>
-   <td><span class="tag ${d.sla===null?'nu':d.sla?'ok':'bad'}">${d.sla===null?'—':d.sla?'dentro':'fora'}</span></td></tr>
+   <td><span class="tag ${d.sla===null?'nu':d.sla?'ok':'bad'}">${d.sla===null?'—':d.sla?'dentro':'fora'}</span></td>`+celulaPrio(d.id)+celulaObs(d.id)+`</tr>
   <tr class="det" id="d${i}" style="display:none"><td colspan="16"><b>${d.inc||''}</b> ${d.versao} · ${d.requerente} · SLA: ${d.sla_nome||'—'} · prazo ${d.prazo||'—'} · últ. atualização ${d.atualizacao||'—'}${d.justificativa?'\n\nJustificativa de causa: '+d.justificativa:''}\n\n${(d.descricao||'sem descrição').replace(/</g,'&lt;')}</td></tr>`).join('');
 }
 document.querySelectorAll('#tbl th').forEach(th=>{th.dataset.base=th.textContent;
@@ -776,17 +777,18 @@ function celulaPrio(id){
  if(!podeEditar())return `<td>${anot(id,'prioridade')||'<span style="color:var(--mut)">—</span>'}</td>`;
  return `<td><select data-anot="prioridade" data-id="${id}" onclick="event.stopPropagation()" style="padding:3px 6px;font-size:12px">`+
   PRIOS.map(p=>`<option value="${p}"${anot(id,'prioridade')===p?' selected':''}>${p||'—'}</option>`).join('')+'</select></td>';}
+const escapaTexto=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 function celulaObs(id){
  const v=anot(id,'observacao');
- if(!podeEditar())return `<td>${v?v.replace(/</g,'&lt;'):'<span style="color:var(--mut)">—</span>'}</td>`;
- return `<td><input data-anot="observacao" data-id="${id}" value="${v.replace(/"/g,'&quot;')}" placeholder="anotar…" onclick="event.stopPropagation()" style="width:170px;padding:3px 6px;font-size:12px"></td>`;}
+ if(!podeEditar())return `<td class="obs">${v?escapaTexto(v):'<span style="color:var(--mut)">—</span>'}</td>`;
+ return `<td class="obs"><textarea data-anot="observacao" data-id="${id}" rows="2" placeholder="anotar… (Enter pula linha)" onclick="event.stopPropagation()" onkeydown="event.stopPropagation()" style="width:200px;min-height:46px;resize:vertical;padding:4px 6px;font-size:12px;line-height:1.35">${escapaTexto(v)}</textarea></td>`;}
 function ligaAnotacoes(){
  document.querySelectorAll('[data-anot]').forEach(el=>{
   if(el.dataset.lig)return; el.dataset.lig='1';
   const salvar=async()=>{const ok=await supSalvar(el.dataset.id,el.dataset.anot,el.value);
     el.style.borderColor=ok?'var(--ok)':'var(--bad)'; setTimeout(()=>el.style.borderColor='',1200);};
   el.addEventListener('change',salvar);
-  if(el.tagName==='INPUT')el.addEventListener('blur',salvar);});}
+  if(el.tagName!=='SELECT')el.addEventListener('blur',salvar);});}
 
 document.getElementById('btnLogin').onclick=()=>{
  if(SESSAO){SESSAO=null;try{localStorage.removeItem('sup_sessao');}catch(e){} marcaSessao();render();return;}
