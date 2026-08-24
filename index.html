@@ -56,7 +56,8 @@ tr.det td{background:#0d1e30;color:var(--mut);font-size:12px;white-space:pre-wra
 .p4{background:rgba(255,193,7,.18);color:#ffcc4d}
 .p5{background:rgba(180,200,60,.18);color:#c9d94f}
 .p6{background:rgba(33,181,115,.18);color:#4ad295}.nu{background:#16304a;color:var(--mut)}
-td.obs{white-space:pre-wrap;max-width:260px;word-break:break-word}
+td.obs{white-space:pre-wrap;min-width:260px;word-break:break-word;font-size:12.5px;line-height:1.4}
+#tAb td.obs,#tAb th.obs{width:34%}
 .scroll{max-height:340px;overflow:auto}.tbl-wrap{overflow-x:auto}
 .ms{position:relative;display:inline-block}.ms>button{min-width:150px;text-align:left}
 .ms-panel{display:none;position:absolute;z-index:50;top:calc(100% + 4px);left:0;min-width:240px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
@@ -441,13 +442,13 @@ function renderFila(){
  clicavel('cSt',cs.map(x=>x[0]),'status');
  clicavel('cCarga',tecs,'fTec');
  cntAb.textContent=ab.length;
- tAb.innerHTML='<thead><tr><th>ID</th><th>Idade</th><th>Título</th><th>Status</th><th>Prioridade</th><th>Solicitante</th><th>Técnico</th><th>Instância</th><th>Prioridade equipe</th><th>Observação</th><th>Últ. atualização</th></tr></thead><tbody>'+
+ tAb.innerHTML='<thead><tr><th>ID</th><th>Idade</th><th>Título</th><th>Status</th><th>Prioridade</th><th>Solicitante</th><th>Técnico</th><th>Instância</th><th>Prioridade equipe</th><th class="obs">Observação</th></tr></thead><tbody>'+
   [...ab].sort((a,b)=>idade(b)-idade(a)).map(d=>{const x=idade(d);
    return `<tr><td>${d.id}</td><td><span class="tag ${x>30?'bad':x>14?'hi':'md'}">${x}d</span></td><td>${d.titulo}</td>
    <td><span class="tag ${d.status==='Pendente'?'hi':'op'}">${d.status}</span></td>
    <td>${tagPrio(d.prioridade)}</td>
    <td>${(d.requerente||'—').split('@')[0]}</td><td>${d.tecnico==='Não atribuído'?'<span style="color:#e02424">sem técnico</span>':nome(d.tecnico)}</td>
-   <td>${d.instancia}</td>`+celulaPrio(d.id)+celulaObs(d.id)+`<td>${d.atualizacao||''} <span style="color:#8aa2bd">(${dias(d.atualizacao||d.abertura)}d)</span></td></tr>`}).join('')+'</tbody>';
+   <td>${d.instancia}</td>`+celulaPrio(d.id)+celulaObs(d.id)+`</tr>`}).join('')+'</tbody>';
  ligaAnotacoes();
 }
 
@@ -734,11 +735,11 @@ function renderTabela(){
    <td>${d.horas!=null?d.horas.toFixed(1):'<span style="color:#7aa7ff">'+idade(d)+'d aberto</span>'}</td>
    <td><span class="tag ${d.sla===null?'nu':d.sla?'ok':'bad'}">${d.sla===null?'—':d.sla?'dentro':'fora'}</span></td>`+celulaPrio(d.id)+celulaObs(d.id)+`</tr>
   <tr class="det" id="d${i}" style="display:none"><td colspan="16"><b>${d.inc||''}</b> ${d.versao} · ${d.requerente} · SLA: ${d.sla_nome||'—'} · prazo ${d.prazo||'—'} · últ. atualização ${d.atualizacao||'—'}${d.justificativa?'\n\nJustificativa de causa: '+d.justificativa:''}\n\n${(d.descricao||'sem descrição').replace(/</g,'&lt;')}</td></tr>`).join('');
+ ligaAnotacoes();
 }
 document.querySelectorAll('#tbl th').forEach(th=>{th.dataset.base=th.textContent;
  th.onclick=()=>{const k=th.dataset.k;sortD=(k===sortK)?-sortD:1;sortK=k;
-  ligaAnotacoes();
- document.querySelectorAll('#tbl th').forEach(x=>x.textContent=x.dataset.base);
+  document.querySelectorAll('#tbl th').forEach(x=>x.textContent=x.dataset.base);
   th.textContent=th.dataset.base+(sortD>0?' ▲':' ▼');renderTabela()};});
 document.getElementById('wSplit').onchange=render;
 
@@ -796,7 +797,7 @@ const escapaTexto=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replac
 function celulaObs(id){
  const v=anot(id,'observacao');
  if(!podeEditar())return `<td class="obs">${v?escapaTexto(v):'<span style="color:var(--mut)">—</span>'}</td>`;
- return `<td class="obs"><textarea data-anot="observacao" data-id="${id}" rows="2" placeholder="anotar… (Enter pula linha)" onclick="event.stopPropagation()" onkeydown="event.stopPropagation()" style="width:200px;min-height:46px;resize:vertical;padding:4px 6px;font-size:12px;line-height:1.35">${escapaTexto(v)}</textarea></td>`;}
+ return `<td class="obs"><textarea data-anot="observacao" data-id="${id}" rows="2" placeholder="anotar… (Enter pula linha)" onclick="event.stopPropagation()" onkeydown="event.stopPropagation()" style="width:100%;min-width:260px;min-height:64px;resize:vertical;padding:6px 8px;font-size:12.5px;line-height:1.4">${escapaTexto(v)}</textarea></td>`;}
 function ligaAnotacoes(){
  document.querySelectorAll('[data-anot]').forEach(el=>{
   if(el.dataset.lig)return; el.dataset.lig='1';
