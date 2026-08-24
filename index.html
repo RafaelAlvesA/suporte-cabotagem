@@ -216,25 +216,10 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
 <div class="page" id="p5">
   <div class="filters" id="filtros5"></div>
   <div class="kpis" id="kpiCausa"></div>
-  <div class="card"><h3>Análise de causa (campo do GLPI)</h3><div class="wrap"><canvas id="cCausa"></canvas></div></div>
+  <div class="grid">
+    <div class="card"><h3>Análise de causa (campo do GLPI)</h3><div class="wrap"><canvas id="cCausa"></canvas></div></div>
     <div class="card"><h3>Preenchimento da causa por técnico (resolvidos)</h3><div class="wrap"><canvas id="cPreench"></canvas></div></div>
-    <div class="card"><h3>Causa × nível de atendimento</h3><div class="wrap"><canvas id="cCausaN"></canvas></div></div>
-    <div class="card"><h3>Tempo mediano por causa</h3><div class="wrap"><canvas id="cCausaT"></canvas></div></div>
   </div>
-  <div class="card"><h3>Detalhamento por causa · clique para ver chamados e justificativas</h3>
-    <div class="tbl-wrap"><table id="tCausa"></table></div>
-    <div class="note" id="notaCausa"></div></div>
-  <div class="card"><h3>Análise de causa por instância <span style="text-transform:none;letter-spacing:0">· recorte
-    <select id="czPer" style="padding:3px 6px;font-size:12px"><option value="0">todo o período</option><option value="7">últimos 7 dias</option><option value="30">últimos 30 dias</option></select>
-    · considera a data de solução</span></h3>
-    <div class="grid" style="margin:0">
-      <div><div style="text-align:center;font-weight:600;font-size:13px;margin-bottom:8px">Aliança Navegação · <span id="czA"></span></div><div class="wrap"><canvas id="cInstA"></canvas></div></div>
-      <div><div style="text-align:center;font-weight:600;font-size:13px;margin-bottom:8px">Maersk Truck · <span id="czB"></span></div><div class="wrap"><canvas id="cInstB"></canvas></div></div>
-    </div>
-  </div>
-  <div class="card"><h3>Tema técnico (inferido do título, complementar)</h3>
-    <div class="wrap" style="height:320px"><canvas id="cTema"></canvas></div>
-    <div class="note">O tema não vem do GLPI: é inferido por palavra-chave do título e do módulo. Serve para enxergar padrão nos chamados sem análise de causa preenchida.</div></div>
   <div class="card">
     <div class="bar"><h3 style="margin:0">Chamados e causas (<span id="cntCausaTab"></span>)</h3>
       <div>
@@ -253,8 +238,7 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
     <div class="scroll tbl-wrap"><table id="tSemCausa"></table></div>
     <div class="note">Chamados já fechados em que o campo "Análise de Causa" do plug-in Fluxo Cabotagem ficou em branco. Respeita os filtros da página.</div>
   </div>
-  <div class="grid">
-  </div>
+</div>
 
 <!-- ======== P4 ======== -->
 <div class="page" id="p4">
@@ -562,28 +546,6 @@ function renderCausas(){
    {label:'Sem causa',data:tecs.map(x=>rs.filter(d=>d.tecnico===x&&d.causa==='Não preenchida').length),backgroundColor:'#4a5f7a'}]},
   options:{...resp,scales:{x:{stacked:true},y:{stacked:true,ticks:{precision:0}}},plugins:{legend:{position:'bottom'}}}});
  const nivs=uniq('nivel');
- chart('cCausaN',{type:'bar',data:{labels:causas,datasets:nivs.map((x,i)=>({label:x,data:causas.map(c=>g(c).filter(d=>d.nivel===x).length),backgroundColor:PAL[i]}))},
-  options:{...resp,indexAxis:'y',scales:{x:{stacked:true,ticks:{precision:0}},y:{stacked:true}},plugins:{legend:{position:'bottom'}}}});
- chart('cCausaT',{type:'bar',data:{labels:causas,datasets:[{data:causas.map(c=>medOf(g(c))||0),backgroundColor:causas.map(c=>COR[c])}]},
-  options:{...resp,...noLeg,indexAxis:'y',scales:{x:{title:{display:true,text:'horas (mediana)'}}}}});
- clicavel('cCausa',causas,'fCausa');
- clicavel('cPreench',tecs,'fTec');
- clicavel('cCausaN',causas,'fCausa');
- clicavel('cCausaT',causas,'fCausa');
- tCausa.innerHTML='<thead><tr><th>Análise de causa</th><th>Total</th><th>%</th><th>Em aberto</th><th>Tempo mediano</th><th>% no SLA</th><th>Nível dominante</th><th>Instância dominante</th></tr></thead><tbody>'+
-  causas.map((c,i)=>{const a=g(c),md=medOf(a),sl=slaOf(a),nv=cont(a,'nivel')[0],ins=cont(a,'instancia')[0];
-   return `<tr onclick="var e=document.getElementById('cz${i}');e.style.display=e.style.display==='table-row'?'none':'table-row'" style="cursor:pointer">
-    <td><b style="color:${COR[c]}">${c}</b></td><td>${a.length}</td><td>${Math.round(a.length/f.length*100)}%</td>
-    <td>${a.filter(d=>d.aberto).length}</td><td>${md!=null?md.toFixed(1)+'h':'—'}</td>
-    <td><span class="tag ${sl==null?'nu':sl>=60?'ok':sl>=40?'hi':'bad'}">${sl==null?'—':sl+'%'}</span></td>
-    <td>${nv?nv[0]+' ('+nv[1]+')':'—'}</td><td>${ins?ins[0]+' ('+ins[1]+')':'—'}</td></tr>
-   <tr class="det" id="cz${i}" style="display:none"><td colspan="8">`+
-    [...a].sort((x,y)=>(y.aberto?1:0)-(x.aberto?1:0)).map(d=>(d.aberto?'🟣 ':'✔ ')+d.id+' · '+d.titulo+
-      (d.aberto?' — '+d.status+', '+idade(d)+'d em aberto':' — '+(d.horas!=null?d.horas.toFixed(1)+'h':'')+(d.sla===false?', fora do SLA':''))+
-      (d.justificativa?'\n     ↳ '+d.justificativa:'')).join('\n')+'</td></tr>'}).join('')+'</tbody>';
- document.getElementById('notaCausa').textContent='Campos "Plug-ins - Fluxo Cabotagem - Análise de Causa" e "Justificativa de Causa" do GLPI. '+
-  (f.length-pre.length)+' de '+f.length+' chamados no recorte atual estão sem causa registrada, então os percentuais por causa descrevem só a parte preenchida.';
- renderCausaInst();
  /* ---- lista de chamados com causa ---- */
  const soCausa=document.getElementById('soComCausa').checked;
  const lista=f.filter(d=>!soCausa||d.causa!=='Não preenchida')
@@ -597,12 +559,6 @@ function renderCausas(){
    <td>${d.causa==='Não preenchida'?'<span style="color:var(--mut)">—</span>':`<span class="tag" style="background:rgba(255,255,255,.06);color:${COR[d.causa]||'var(--tx)'}">${d.causa}</span>`}</td>
    <td class="obs" style="min-width:280px">${d.justificativa?escapaTexto(d.justificativa):'<span style="color:var(--mut)">—</span>'}</td></tr>`).join('')+'</tbody>';
  window.__listaCausa=lista;
- const ct=cont(f,'tema');
- chart('cTema',{type:'bar',data:{labels:ct.map(x=>x[0]),datasets:[
-   {label:'Resolvidos',data:ct.map(x=>f.filter(d=>d.tema===x[0]&&!d.aberto).length),backgroundColor:'#2f6fed'},
-   {label:'Em aberto',data:ct.map(x=>f.filter(d=>d.tema===x[0]&&d.aberto).length),backgroundColor:'#7aa7ff'}]},
-  options:{...resp,indexAxis:'y',scales:{x:{stacked:true,ticks:{precision:0}},y:{stacked:true}},plugins:{legend:{position:'bottom'}}}});
- clicavel('cTema',ct.map(x=>x[0]),'fTema');
 }
 
 // ================= P6 =================
@@ -718,21 +674,6 @@ document.getElementById('snapPer').onchange=renderSnap;
 document.getElementById('snapFonte').onchange=renderSnap;
 document.getElementById('instPer').onchange=renderSnap;
 
-function renderCausaInst(){
- const dias=+document.getElementById('czPer').value;
- const base=DATA.filter(d=>d.causa!=='Não preenchida'&&(!dias||(d.solucao&&(REF-new Date(d.solucao.replace(' ','T')))/864e5<=dias)));
- const COR={'Falha na aplicação - Produto':'#e02424','Falha na aplicação - Infra':'#ff7a29','Falha na aplicação - Projeto':'#e0479e',
-  'Erros de usuário':'#ff9f1c','Dúvidas':'#00b8d9','Requisições':'#2f6fed'};
- [['Aliança Navegação','cInstA','czA'],['Maersk Truck','cInstB','czB']].forEach(([inst,cv,sp])=>{
-   const g=base.filter(d=>d.instancia===inst), c=cont(g,'causa');
-   document.getElementById(sp).textContent='total '+g.length;
-   chart(cv,{type:'doughnut',data:{labels:c.map(x=>x[0]+' — '+x[1]+' ('+(g.length?Math.round(x[1]/g.length*100):0)+'%)'),
-     datasets:[{data:c.map(x=>x[1]),backgroundColor:c.map(x=>COR[x[0]]||'#8aa2bd'),borderWidth:0}]},
-    options:{...resp,plugins:{legend:{position:'right',labels:{boxWidth:10}}}}});
-   clicavel(cv,c.map(x=>x[0]),'fCausa');
- });
-}
-document.getElementById('czPer').onchange=renderCausaInst;
 document.getElementById('scPer').onchange=renderCausas;
 document.getElementById('soComCausa').onchange=renderCausas;
 document.getElementById('btnCsvCausa').onclick=()=>{
