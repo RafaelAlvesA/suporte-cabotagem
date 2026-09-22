@@ -25,13 +25,13 @@ h1{font-size:20px;margin:0 0 4px}.sub{color:var(--mut);font-size:13px;margin-bot
 select,input,button,textarea{background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit}
 button{cursor:pointer}
 .tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:18px;flex-wrap:wrap}
-.tabs button{background:none;border:none;border-bottom:2px solid transparent;border-radius:0;padding:10px 14px;color:var(--mut);font-size:13.5px;font-weight:600}
+.tabs button{background:none;border:none;border-bottom:2px solid transparent;border-radius:0;padding:12px 14px;min-height:44px;color:var(--mut);font-size:13.5px;font-weight:600}
 .tabs button.on{color:var(--tx);border-bottom-color:var(--ac)}
 .tabs button:hover{color:var(--tx)}
 .tabmais{position:relative;display:inline-block}
 .tabmais-panel{display:none;position:absolute;z-index:60;top:calc(100% - 1px);left:0;min-width:170px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,.45)}
 .tabmais-panel.open{display:block}
-.tabmais-panel button{display:block;width:100%;text-align:left;border-bottom:none;border-radius:6px;padding:7px 10px;font-size:13px}
+.tabmais-panel button{display:block;width:100%;text-align:left;border-bottom:none;border-radius:6px;padding:11px 12px;min-height:44px;font-size:13px}
 .tabmais-panel button:hover{background:rgba(127,127,127,.12)}
 .tabmais-panel button.on{color:var(--tx);background:rgba(255,61,3,.14)}
 .tabmais.ativo>.dropBtn{color:var(--tx);border-bottom-color:var(--ac)}
@@ -44,6 +44,40 @@ button{cursor:pointer}
 .kpi.acc{border-color:var(--ac);box-shadow:inset 3px 0 0 var(--ac)}.kpi.wrn{border-color:var(--warn)}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-bottom:16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:1100px){.grid3{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.grid3{grid-template-columns:1fr}}
+.plantaoLinha{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:12px 16px}
+.plantaoLinha h3{margin:0}
+.plantaoLinha #plantaoHome{display:flex;gap:8px 28px;flex-wrap:wrap;font-size:13px}
+.plantaoLinha .it{color:var(--mut)}
+.plantaoLinha .it b{color:var(--tx);font-weight:600;margin-left:6px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+.acoesHome{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.acao{display:flex;flex-direction:column;gap:2px;min-width:0;text-align:left;
+ background:#0d1c31;border:1px solid var(--line);border-radius:10px;padding:11px 13px;cursor:pointer;
+ color:var(--tx);font:inherit;transition:border-color .15s,background .15s}
+.acao:hover{border-color:#2f6fed;background:#122544}
+.acao .n{font-size:20px;font-weight:600;line-height:1.1}
+/* 6) o mais urgente ganha espaço e tamanho, não só cor */
+.acao[data-ac="critsemtec"].alerta{grid-column:span 2}
+.acao[data-ac="critsemtec"].alerta .n{font-size:28px;font-weight:700}
+@media(max-width:480px){.acao[data-ac="critsemtec"].alerta{grid-column:auto}}
+.acao .t{font-size:11.5px;color:var(--mut);letter-spacing:.2px}
+.acao.zero .n{color:var(--mut)}
+.acao.alerta{border-color:#e0242455;background:#1a1220}
+.acao.alerta .n{color:#e02424}
+.acao.aviso{border-color:#ffc10744}
+.acao.aviso .n{color:#ffc107}
+.acao.ok .n{color:#21b573}
+.linhaHome{display:flex;justify-content:space-between;gap:12px;padding:3px 0;border-bottom:1px solid #142640}
+.linhaHome:last-child{border-bottom:0}
+.linhaHome b{font-weight:600}
+.rodape{display:flex;flex-wrap:wrap;gap:6px 22px;justify-content:center;align-items:center;
+ color:var(--mut);font-size:11.5px;letter-spacing:.2px;padding:4px 0 14px}
+.rodape b{color:#8aa2bd;font-weight:600}
+.rodape .p{white-space:nowrap}
 .card h3{margin:0 0 12px;font-size:13px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
 .wrap{position:relative;height:260px}
 table{width:100%;border-collapse:collapse;font-size:12.5px}
@@ -54,13 +88,13 @@ tr.det td{background:#0d1e30;color:var(--mut);font-size:12px;white-space:pre-wra
 #tbl tbody tr:not(.det){cursor:pointer}#tbl tbody tr:not(.det):hover{background:#16304a}
 .tag{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600}
 .ok{background:rgba(33,181,115,.14);color:var(--ok)}.bad{background:rgba(224,36,36,.14);color:var(--bad)}
-.hi{background:rgba(255,159,28,.16);color:var(--warn)}.md{background:rgba(47,111,237,.16);color:var(--ac)}
+.hi{background:rgba(255,159,28,.16);color:var(--warn)}.md{background:rgba(122,167,255,.14);color:#a9c4ff}
 .op{background:rgba(122,167,255,.18);color:var(--rx)}
 .p1{background:rgba(224,36,36,.20);color:#ff6b6b}
-.p2{background:rgba(255,87,34,.20);color:#ff8a4c}
+.p2{background:rgba(255,122,41,.18);color:#ffa259}
 .p3{background:rgba(255,122,41,.18);color:#ffa259}
 .p4{background:rgba(255,193,7,.18);color:#ffcc4d}
-.p5{background:rgba(180,200,60,.18);color:#c9d94f}
+.p5{background:rgba(255,193,7,.18);color:#ffcc4d}
 .p6{background:rgba(33,181,115,.18);color:#4ad295}.nu{background:#16304a;color:var(--mut)}
 td.obs{white-space:pre-wrap;min-width:260px;word-break:break-word;font-size:12.5px;line-height:1.4}
 #tAb td.obs,#tAb th.obs{width:34%}
@@ -142,7 +176,8 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
 </div>
 
 <div class="tabs">
-  <button data-p="p1" class="on">Relatório diário</button>
+  <button data-p="p0" class="on">Início</button>
+  <button data-p="p1">Relatório diário</button>
   <button data-p="p2">Fila em aberto</button>
   <button data-p="p6">Histórico diário</button>
   <button data-p="p3">Histórico &amp; SLA</button>
@@ -161,7 +196,27 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
 </div>
 
 <!-- ======== P1 ======== -->
-<div class="page on" id="p1">
+<!-- ======== P0 (início) ======== -->
+<div class="page on" id="p0">
+  <div class="kpis" id="kpiHome"></div>
+  <div class="card plantaoLinha"><h3>Plantão</h3><div id="plantaoHome"></div></div>
+  <div class="card" id="cardAcaoHome" style="display:none"><h3>Precisa de ação <span style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--mut);font-size:12px">· clique para abrir a lista já filtrada</span></h3>
+    <div id="acaoHome" class="acoesHome"></div>
+  </div>
+  <div class="card" id="cardFilaHome" style="display:none"><h3>Chamados em aberto (<span id="cntFilaHome"></span>) <span style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--mut);font-size:12px">· dos mais antigos para os mais novos</span>
+    <button type="button" id="verFilaHome" style="float:right;font-size:12px;padding:4px 10px">Ver a fila completa</button></h3>
+    <div class="tbl-wrap" style="max-height:60vh"><table id="tFilaHome"></table></div>
+  </div>
+  <div class="grid3">
+    <div class="card"><h3>Última subida em produção</h3><div id="deployHome" style="font-size:13px;line-height:1.7"></div></div>
+    <div class="card"><h3>A semana em números</h3><div id="semanaHome" style="font-size:13px;line-height:1.7"></div></div>
+    <div class="card"><h3>Onde estão os chamados</h3><div id="ondeHome" style="font-size:13px;line-height:1.7"></div></div>
+  </div>
+  <div class="card" id="cardDevHome" style="display:none"><h3>Com o time de dev</h3><div id="devHome" style="font-size:13px;line-height:1.7"></div></div>
+  <div id="fonteHome" class="rodape"></div>
+</div>
+
+<div class="page" id="p1">
   <div class="filters" id="filtros1"></div>
   <div class="kpis" id="kpiCli"></div>
   <div class="grid">
@@ -381,7 +436,7 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
   <select class="f" data-f="fCausa"></select>
   <select class="f" data-f="fTema"></select>
   <select class="f" data-f="fModulo"></select>
-  <select class="f" data-f="fSla"><option value="">SLA: todos</option><option value="ok">Dentro do SLA</option><option value="bad">Fora do SLA</option></select>
+  <select class="f" data-f="fSla"><option value="">SLA: todos</option><option value="ok">Dentro do SLA</option><option value="bad">Fora do SLA</option><option value="venc">Prazo vencido e em aberto</option></select>
   <input class="f" data-f="fHmin" type="number" min="0" step="1" placeholder="horas ≥" style="width:105px">
   <input class="f" data-f="fHmax" type="number" min="0" step="1" placeholder="horas ≤" style="width:105px">
   <input class="f" data-f="fBusca" placeholder="Buscar em título, descrição, INC, módulo, causa…"><button class="limpar">Limpar</button>
@@ -516,7 +571,7 @@ const filtraAtiv=()=>ATIV.filter(x=>
   &&(!FA.aResp||x.resp===FA.aResp)&&(!FA.aTag||x.tags.indexOf(FA.aTag)>=0)
   &&(!FA.aVer||(FA.aVer==='-sem'?!deployDe(x):(deployDe(x)||{}).v===FA.aVer))
   &&(!FA.aBusca||(x.titulo+' '+x.id).toLowerCase().includes(FA.aBusca.toLowerCase())));
-const CLASSE_GR={'Concluído':'ok','Cancelado':'nu','Backlog':'md','Em andamento':'op',
+const CLASSE_GR={'Concluído':'ok','Cancelado':'nu','Backlog':'nu','Em andamento':'op',
   'Em teste':'hi','Aguardando go live':'hi','Impedimento':'bad','Outro':'nu'};
 function montaFiltrosAtiv(){
  const host=document.getElementById('filtros9');
@@ -840,7 +895,7 @@ function sincroniza(){
 montaFiltros(document.getElementById('filtros2'));montaFiltros(document.getElementById('filtros4'));montaFiltros(document.getElementById('filtros5'));sincroniza();
 const filtrar=()=>DATA.filter(d=>(!F.fSit||(F.fSit==='aberto'?d.aberto:!d.aberto))&&(stSel.size===0||stSel.has(d.status))
  &&(!F.fTec||d.tecnico===F.fTec)&&(!F.fSolic||d.requerente===F.fSolic)&&(!F.fInst||d.instancia===F.fInst)&&(!F.fNivel||d.nivel===F.fNivel)&&(!F.fPrio||d.prioridade===F.fPrio)&&(!F.fCausa||d.causa===F.fCausa)&&(!F.fTema||d.tema===F.fTema)&&(!F.fModulo||(d.modulo||'—')===F.fModulo)
- &&(!F.fSla||(F.fSla==='ok'?d.sla===true:d.sla===false))
+ &&(!F.fSla||(F.fSla==='ok'?d.sla===true:F.fSla==='venc'?(d.aberto&&d.prazo&&new Date(d.prazo.replace(' ','T'))<REF):d.sla===false))
  &&(F.fHmin===''||(d.horas!=null&&d.horas>=+F.fHmin))&&(F.fHmax===''||(d.horas!=null&&d.horas<=+F.fHmax))
  &&(!F.fBusca||[d.titulo,d.inc,d.modulo,d.id,d.requerente,d.descricao,d.causa,d.justificativa].join(' ').toLowerCase().includes(F.fBusca.toLowerCase())));
 
@@ -850,6 +905,147 @@ const seg=s=>{const d=new Date(s.replace(' ','T'));d.setDate(d.getDate()-((d.get
 const rot=w=>{const d=new Date(w+'T00:00'),f=new Date(d);f.setDate(d.getDate()+6);
  const p=x=>String(x.getDate()).padStart(2,'0')+'/'+String(x.getMonth()+1).padStart(2,'0');return p(d)+'–'+p(f)};
 let manha=true;
+
+// ================= P0 (início) =================
+/* leva para uma aba já com os filtros aplicados */
+function irPara(pagina,filtros,status){
+ const b=document.querySelector('.tabs button[data-p="'+pagina+'"]');
+ if(!b)return;
+ Object.keys(F).forEach(k=>F[k]='');
+ stSel=new Set(status||[]);
+ Object.assign(F,filtros||{});
+ document.querySelectorAll('.filters').forEach(h=>{const alvo=h.querySelectorAll('.f');if(alvo.length)sincroniza();});
+ b.click();
+ try{window.scrollTo({top:0,behavior:'smooth'});}catch(e){}}
+const diasDe=s=>s?Math.floor((REF-new Date(s.replace(' ','T')))/864e5):null;
+function cartao(n,titulo,classe,onclick){
+ return '<button type="button" class="acao '+(n===0?'zero':classe||'')+'" data-ac="'+onclick+'">'
+  +'<div class="n">'+n+'</div><div class="t">'+titulo+'</div></button>';}
+function renderHome(){
+ const ab=DATA.filter(d=>d.aberto);
+ const hoje=diaISO(REF);
+ const novosHoje=DATA.filter(d=>d.abertura&&d.abertura.slice(0,10)===hoje).length;
+ const resHoje=DATA.filter(d=>d.solucao&&d.solucao.slice(0,10)===hoje).length;
+ const ids=ab.map(d=>diasDe(d.abertura)).sort((a,b)=>a-b);
+ const med=ids.length?ids[Math.floor(ids.length/2)]:0;
+ const res=DATA.filter(d=>!d.aberto&&d.sla!==null);
+ const dentro=res.filter(d=>d.sla).length;
+ kpiHTML('kpiHome',[
+  ['Em aberto',ab.length,'acc'],
+  ['Novos hoje',novosHoje],
+  ['Resolvidos hoje',resHoje],
+  ['Idade mediana',med+'d'],
+  ['Mais de 30 dias',ab.filter(d=>diasDe(d.abertura)>30).length],
+  ['SLA no total',res.length?Math.round(dentro/res.length*100)+'%':'—']]);
+
+ const semTec=ab.filter(d=>d.tecnico==='Não atribuído');
+ const crit=ab.filter(d=>/crit|muito alta/i.test(d.prioridade||''));
+ const critSemTec=crit.filter(d=>d.tecnico==='Não atribuído');
+ const velhos=ab.filter(d=>diasDe(d.abertura)>30);
+ const pend=ab.filter(d=>d.status==='Pendente');
+ const lim=new Date(REF); lim.setDate(lim.getDate()-7);
+ const semCausa=DATA.filter(d=>!d.aberto&&d.solucao&&new Date(d.solucao.replace(' ','T'))>=lim&&(!d.causa||d.causa==='Não preenchida'));
+ const estourado=ab.filter(d=>d.prazo&&new Date(d.prazo.replace(' ','T'))<REF);
+
+ /* quem é do time vê o que precisa de ação; quem não é vê a fila em aberto */
+ const interno=ehInterno();
+ document.getElementById('cardAcaoHome').style.display=interno?'':'none';
+ document.getElementById('cardFilaHome').style.display=interno?'none':'';
+ if(!interno){
+  const lista=[...ab].sort((a,b)=>(diasDe(b.abertura)||0)-(diasDe(a.abertura)||0));
+  document.getElementById('cntFilaHome').textContent=lista.length;
+  document.getElementById('tFilaHome').innerHTML=
+   '<thead><tr><th>ID</th><th>Título</th><th>Instância</th><th>Status</th><th>Prioridade</th><th>Técnico</th><th>Aberto há</th></tr></thead><tbody>'+
+   lista.map(d=>`<tr><td>${linkId(d.id)}</td><td>${(d.titulo||'').replace(/</g,'&lt;')}</td>
+    <td>${d.instancia}</td>
+    <td><span class="tag ${d.status==='Pendente'?'hi':'op'}">${d.status}</span></td>
+    <td>${tagPrio(d.prioridade)}</td>
+    <td>${d.tecnico==='Não atribuído'?'<span style="color:#8aa2bd">a definir</span>':nomeCurto(d.tecnico)}</td>
+    <td>${tagIdade(diasDe(d.abertura))}</td></tr>`).join('')+'</tbody>';
+  const vf=document.getElementById('verFilaHome'); if(vf)vf.onclick=()=>irPara('p2',{fSit:'aberto'});
+ }
+ document.getElementById('acaoHome').innerHTML=
+  cartao(critSemTec.length,'Críticos sem técnico',critSemTec.length?'alerta':'ok','critsemtec')
+ +cartao(semTec.length,'Sem técnico',semTec.length?'aviso':'ok','semtec')
+ +cartao(estourado.length,'Prazo de SLA estourado',estourado.length?'alerta':'ok','estourado')
+ +cartao(semCausa.length,'Resolvidos sem causa (7 dias)',semCausa.length?'aviso':'ok','semcausa')
+ +cartao(velhos.length,'Abertos há mais de 30 dias',velhos.length?'aviso':'ok','velhos')
+ +cartao(pend.length,'Pendentes com o cliente','','pend');
+ document.querySelectorAll('#acaoHome .acao').forEach(b=>b.onclick=()=>{
+  const a=b.dataset.ac;
+  if(a==='critsemtec')irPara('p2',{fSit:'aberto',fTec:'Não atribuído',fPrio:'Critica'});
+  else if(a==='semtec')irPara('p2',{fSit:'aberto',fTec:'Não atribuído'});
+  else if(a==='estourado')irPara('p2',{fSit:'aberto',fSla:'venc'});
+  else if(a==='semcausa')irPara('p1');
+  else if(a==='velhos'){irPara('p2',{fSit:'aberto'});ordA='idade';dirA=-1;renderFila();}
+  else if(a==='pend')irPara('p2',{fSit:'aberto'},['Pendente']);});
+
+ const agora=new Date(), at=plantaoAgora(agora), px=proximoPlantao(agora);
+ const chAt=at?chamadosPlantao(at):[];
+ document.getElementById('plantaoHome').innerHTML=
+  '<span class="it">Agora<b>'+(at?at.quem+' até '+ddmm(at.fim)+' '+hhmm(at.fim):'ninguém de plantão')+'</b></span>'
+ +(at?'<span class="it">Chamados neste plantão<b>'+chAt.length+'</b></span>':'')
+ +'<span class="it">Próximo<b>'+(px?px.quem+' · '+ddmm(px.ini)+' '+hhmm(px.ini):'—')+'</b></span>';
+
+ const dp=[...DEPLOYS].sort((a,b)=>a.ini<b.ini?1:-1);
+ const porAmb={};
+ dp.forEach(d=>{if(!porAmb[d.c])porAmb[d.c]=d;});
+ document.getElementById('deployHome').innerHTML=Object.keys(porAmb).map(c=>{
+  const d=porAmb[c], dias=Math.floor((REF-new Date(d.ini.replace(' ','T')))/864e5);
+  return '<div class="linhaHome"><span style="color:'+corAmb(c)+'">● '+c+'</span><b>'+d.v+' · '+d.ini.slice(8,10)+'/'+d.ini.slice(5,7)+' ('+dias+'d)</b></div>';}).join('')
+ +'<div class="linhaHome"><span>Itens na última release</span><b>'+(dp.length?relDe(dp[0].v).length:0)+'</b></div>';
+
+ const s0=seg(diaISO(REF)+' 00:00');
+ const sem=DATA.filter(d=>d.abertura&&seg(d.abertura)===s0);
+ const semRes=DATA.filter(d=>d.solucao&&seg(d.solucao)===s0);
+ /* compara só os mesmos dias já decorridos da semana passada */
+ const decorridos=Math.floor((new Date(hoje+'T23:59')-new Date(s0+'T00:00'))/864e5);
+ const ant=new Date(s0+'T00:00'); ant.setDate(ant.getDate()-7);
+ const s1=diaISO(ant), fim1=new Date(ant); fim1.setDate(fim1.getDate()+decorridos);
+ const lim1=diaISO(fim1)+' 23:59';
+ const semAnt=DATA.filter(d=>d.abertura&&seg(d.abertura)===s1&&d.abertura<=lim1).length;
+ const dif=sem.length-semAnt;
+ const hh=semRes.filter(d=>d.horas!=null).map(d=>d.horas).sort((a,b)=>a-b);
+ const medH=hh.length?hh[Math.floor(hh.length/2)]:null;
+ document.getElementById('semanaHome').innerHTML=
+  '<div class="linhaHome"><span>Abertos nesta semana</span><b>'+sem.length+' <span style="color:'+(dif>0?'#e02424':dif<0?'#21b573':'#8aa2bd')+'">('+(dif>0?'+':'')+dif+' que na semana passada até aqui)</span></b></div>'
+ +'<div class="linhaHome"><span>Resolvidos nesta semana</span><b>'+semRes.length+'</b></div>'
+ +'<div class="linhaHome"><span>Tempo mediano de solução</span><b>'+(medH==null?'—':medH>48?Math.round(medH/24)+' dias':medH.toFixed(1)+'h')+'</b></div>'
+ +'<div class="linhaHome"><span>Críticos em aberto</span><b>'+crit.length+'</b></div>';
+
+ const cont2=(lista,campo)=>{const m={};lista.forEach(d=>{const v=d[campo]||'—';m[v]=(m[v]||0)+1;});
+  return Object.entries(m).sort((a,b)=>b[1]-a[1]);};
+ const porInst=cont2(ab,'instancia'), porTela=cont2(ab.filter(d=>d.rota),'rota'), porTema=cont2(ab,'tema');
+ document.getElementById('ondeHome').innerHTML=
+  porInst.slice(0,3).map(([k,v])=>'<div class="linhaHome"><span>'+k+'</span><b>'+v+'</b></div>').join('')
+ +'<div class="linhaHome"><span style="color:var(--mut)">Tela com mais chamados</span><b>'+(porTela[0]?porTela[0][0]+' ('+porTela[0][1]+')':'—')+'</b></div>'
+ +'<div class="linhaHome"><span style="color:var(--mut)">Tema mais frequente</span><b>'+(porTema[0]?porTema[0][0]+' ('+porTema[0][1]+')':'—')+'</b></div>';
+
+ const cd=document.getElementById('cardDevHome');
+ if(interno){
+  cd.style.display='';
+  const pp=ATIV.filter(x=>x.tipo==='Problema em prod');
+  const abertos=pp.filter(x=>GR_ABERTO.indexOf(x.gr)>=0);
+  const velho=abertos.map(idadeCard).filter(v=>v!=null).sort((a,b)=>b-a)[0];
+  document.getElementById('devHome').innerHTML=
+   '<div class="linhaHome"><span>Cards aguardando retorno</span><b>'+abertos.length+'</b></div>'
+  +'<div class="linhaHome"><span>Com chamado vinculado</span><b>'+abertos.filter(x=>x.ch).length+' de '+abertos.length+'</b></div>'
+  +'<div class="linhaHome"><span>Card em aberto mais antigo</span><b>'+(velho!=null?velho+' dias':'—')+'</b></div>'
+  +'<div style="margin-top:8px"><button type="button" class="acao" style="min-width:0;flex:0 0 auto" id="vaiDev"><div class="t">Abrir o Time dev e montar a mensagem →</div></button></div>';
+  const bd=document.getElementById('vaiDev'); if(bd)bd.onclick=()=>irPara('p11');
+ }else cd.style.display='none';
+
+
+ /* rodapé: até quando cada fonte está atualizada */
+ const cur=s=>s?s.slice(8,10)+'/'+s.slice(5,7)+(s.length>10?' '+s.slice(11,16):''):'—';
+ let mxAtiv=null;
+ ATIV.forEach(x=>{[x.ini,x.fim].forEach(v=>{if(v&&(!mxAtiv||v>mxAtiv))mxAtiv=v;});});
+ const ultDep=dp.length?dp[0]:null;
+ document.getElementById('fonteHome').innerHTML=
+  '<span class="p">GLPI até <b>'+cur(RAW.ref)+'</b> · '+DATA.length+' chamados</span>'
+ +'<span class="p">DevOps até <b>'+cur(mxAtiv)+'</b> · '+ATIV.length+' work items</span>'
+ +'<span class="p">Atualizações até <b>'+cur(ultDep?ultDep.ini:null)+'</b> · '+(ultDep?ultDep.v+' na '+ultDep.c:'—')+'</span>';
+}
 
 // ================= P1 =================
 function renderCliente(){
@@ -1531,7 +1727,7 @@ const ORDEM_CAUSA=['Falha na aplicação - Produto','Falha na aplicação - Infr
 const COR_CAUSA={'Falha na aplicação - Produto':'#e02424','Falha na aplicação - Infra':'#ff7a29',
  'Falha na aplicação - Projeto':'#b05ce6','Erros de usuário':'#ffc107','Requisições':'#21b573',
  'Dúvidas':'#2f6fed','Não preenchida':'#4a5f7a'};
-const AC_SIT={'Concluído':'ok','Em andamento':'op','Em teste':'hi','Aguardando go live':'hi','Backlog':'md','Impedimento':'bad','Cancelado':'nu'};
+const AC_SIT={'Concluído':'ok','Em andamento':'op','Em teste':'hi','Aguardando go live':'hi','Backlog':'nu','Impedimento':'bad','Cancelado':'nu'};
 function acoes(){
  return ATIV.filter(x=>AC_TIPOS.has(x.tipo)&&x.gr!=='Cancelado').map(x=>{
    const c=causaDe(x),dp=deployDe(x);
@@ -1692,6 +1888,7 @@ function renderAcoes(){
 
 
 function render(){const p=document.querySelector('.page.on').id;
+ if(p==='p0')return renderHome();
  if(p==='p10')return renderAcoes();
  if(p==='p9')return ehInterno()?renderAtiv():aplicaAcesso();
  if(p==='p11')return ehInterno()?renderDev():aplicaAcesso();
