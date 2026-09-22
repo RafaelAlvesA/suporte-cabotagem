@@ -35,6 +35,11 @@ button{cursor:pointer}
 .tabmais-panel button:hover{background:rgba(127,127,127,.12)}
 .tabmais-panel button.on{color:var(--tx);background:rgba(255,61,3,.14)}
 .tabmais.ativo>.dropBtn{color:var(--tx);border-bottom-color:var(--ac)}
+h2.secao{font-size:15px;font-weight:600;margin:28px 0 14px;padding-top:18px;border-top:1px solid var(--line);color:var(--tx)}
+h2.secao span{font-size:12px;font-weight:500;color:var(--mut);margin-left:8px}
+.segs{display:inline-flex;gap:4px;padding:4px;background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:16px}
+.segs button{background:none;border:0;border-radius:7px;padding:9px 16px;min-height:40px;color:var(--mut);font-weight:600}
+.segs button.on{background:var(--card2);color:var(--tx);box-shadow:inset 0 -2px 0 var(--ac)}
 .page{display:none}.page.on{display:block}
 .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px}
@@ -58,7 +63,7 @@ button{cursor:pointer}
 .plantaoLinha .it{color:var(--mut)}
 .plantaoLinha .it b{color:var(--tx);font-weight:600;margin-left:6px}
 @media(max-width:900px){.grid2{grid-template-columns:1fr}}
-.acoesHome{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.acoesHome{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
 .acao{display:flex;flex-direction:column;gap:2px;min-width:0;text-align:left;
  background:#0d1c31;border:1px solid var(--line);border-radius:10px;padding:11px 13px;cursor:pointer;
  color:var(--tx);font:inherit;transition:border-color .15s,background .15s}
@@ -71,10 +76,21 @@ button{cursor:pointer}
 .acao .t{font-size:11.5px;color:var(--mut);letter-spacing:.2px}
 .acao.zero .n{color:var(--mut)}
 .acao.alerta{border-color:#e0242455;background:#1a1220}
-.acao.alerta .n{color:#e02424}
+.acao.alerta .n{color:#ff5a5a}
 .acao.aviso{border-color:#ffc10744}
 .acao.aviso .n{color:#ffc107}
 .acao.ok .n{color:#21b573}
+/* 4) rótulos ancorados na base de todos os cartões */
+.acoesHome .acao{justify-content:flex-end;position:relative;padding-right:44px}
+/* 5) SLA estourado em laranja: o vermelho fica só para o crítico */
+.acao[data-ac="estourado"].alerta{background:#0d1c31;border-color:#ff7a2955}
+.acao[data-ac="estourado"].alerta .n{color:#ff8a4c}
+/* 6) acompanhamento, não ação */
+.acao.neutro .n{color:#a8bcd2}
+/* 7) sinal de clique */
+.acoesHome .acao::after{content:'ver \203A';position:absolute;right:12px;bottom:11px;font-size:11px;color:#6b8199}
+.acoesHome .acao:hover::after{color:#a9c4ff}
+.acoesHome .acao.zero::after{display:none}
 .linhaHome{display:flex;justify-content:space-between;gap:12px;padding:3px 0;border-bottom:1px solid #142640}
 .linhaHome:last-child{border-bottom:0}
 .linhaHome b{font-weight:600}
@@ -181,20 +197,22 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
 
 <div class="tabs">
   <button data-p="p0" class="on">Início</button>
-  <button data-p="p1">Relatório diário</button>
   <button data-p="p2">Fila em aberto</button>
-  <button data-p="p6">Histórico diário</button>
-  <button data-p="p3">Histórico &amp; SLA</button>
-  <button data-p="p5">Causas</button>
-  <button data-p="p4">Todos os chamados</button>
-  <div class="tabmais" id="dropMais">
-    <button type="button" class="dropBtn">Mais ▾</button>
+  <button data-p="p4">Chamados</button>
+  <div class="tabmais" data-grupo="analise">
+    <button type="button" class="dropBtn">Análise ▾</button>
     <div class="tabmais-panel">
-      <button data-p="p7">Plantão</button>
-    <button data-p="p11" id="abaTimeDev" style="display:none">Time dev</button>
-      <button data-p="p10">Ações estruturais</button>
-      <button data-p="p9" style="display:none">Atividades</button>
-      <button data-p="p8">Atualizações</button>
+      <button data-p="p6">Tendências</button>
+      <button data-p="p5">Causa raiz</button>
+      <button data-p="p8">Entregas</button>
+    </div>
+  </div>
+  <button data-p="p7">Plantão</button>
+  <div class="tabmais grupoInterno" data-grupo="time" style="display:none">
+    <button type="button" class="dropBtn">Time ▾</button>
+    <div class="tabmais-panel">
+      <button data-p="p1">Relatório do dia</button>
+      <button data-p="p11">Desenvolvimento</button>
     </div>
   </div>
 </div>
@@ -286,11 +304,8 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
     <div class="wrap" style="height:320px"><canvas id="cInstHist"></canvas></div></div>
   <div class="card"><h3>Registro diário</h3><div class="scroll tbl-wrap"><table id="tSnap"></table></div>
     <div class="note" id="notaSnap"></div></div>
-</div>
 
-<!-- ======== P3 ======== -->
-<div class="page" id="p3">
-  <div class="filters" id="filtros3"></div>
+  <h2 class="secao">Fluxo semanal e SLA</h2>
   <div class="kpis" id="kpiHist"></div>
   <div class="card"><h3>Fluxo semanal <span style="text-transform:none;letter-spacing:0">· barras = resolvidos por
     <select id="wSplit" style="padding:3px 6px;font-size:12px"><option value="instancia" selected>instância</option><option value="tecnico">técnico</option><option value="causa">análise de causa</option><option value="prioridade">prioridade</option><option value="sla">SLA</option></select>
@@ -304,6 +319,8 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
     <div class="card"><h3>Módulos mais afetados</h3><div class="wrap"><canvas id="cMod"></canvas></div></div>
   </div>
 </div>
+
+<!-- ======== P3 ======== -->
 
 <!-- ======== P5 ======== -->
 <div class="page" id="p5">
@@ -339,11 +356,8 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
     <div class="scroll tbl-wrap"><table id="tSemCausa"></table></div>
     <div class="note">Chamados já fechados em que o campo "Análise de Causa" do plug-in Fluxo Cabotagem ficou em branco. Respeita os filtros da página.</div>
   </div>
-</div>
 
-<!-- ======== P4 ======== -->
-<!-- ======== P10 ======== -->
-<div class="page" id="p10">
+  <h2 class="secao">Ações estruturais <span>o que foi feito e se funcionou</span></h2>
   <div class="filters" id="filtrosAcoes" style="margin-bottom:14px">
     <div class="ms" id="msCausa"><button type="button" class="msBtnC">Causa: todas ▾</button><div class="ms-panel"></div></div>
     <span style="color:var(--mut);font-size:12px;align-self:center">filtra todos os gráficos desta aba</span>
@@ -366,27 +380,15 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
     <div class="wrap" style="height:280px"><canvas id="cCiot"></canvas></div></div>
 </div>
 
+<!-- ======== P4 ======== -->
+<!-- ======== P10 ======== -->
+
 <!-- ======== P9 ======== -->
-<div class="page" id="p9">
-  <div class="filters" id="filtros9">
-    <div class="ms" id="msTipo"><button type="button" class="msBtnA">Tipo ▾</button><div class="ms-panel"></div></div>
-    <select class="fa" data-fa="aGrupo"></select>
-    <select class="fa" data-fa="aSt"></select>
-    <select class="fa" data-fa="aResp"></select>
-    <select class="fa" data-fa="aTag"></select>
-    <select class="fa" data-fa="aVer"></select>
-    <input class="fa" data-fa="aBusca" placeholder="Buscar por título ou ID" style="min-width:240px">
-    <button class="limparA">Limpar</button>
-  </div>
-  <div class="kpis" id="kpiAtiv"></div>
-  <div class="card"><h3>Atividades (<span id="cntAtiv"></span>)</h3>
-    <div class="tbl-wrap" style="max-height:76vh"><table id="tAtiv"></table></div>
-    <div class="note">Backlog do time no Azure DevOps: histórias, defeitos, problemas em produção, tarefas e casos de teste. A coluna Deploy é inferida pela data: mostra a primeira subida em produção posterior à conclusão do item. Itens concluídos antes do primeiro deploy registrado, ou que ainda não subiram, ficam sem versão. Fonte: export do board.</div>
-  </div>
-</div>
 
 <!-- ======== P11 (time dev) ======== -->
 <div class="page" id="p11">
+  <div class="segs" id="segDev"><button type="button" data-s="secCobranca" class="on">Cobrança</button><button type="button" data-s="secBacklog">Backlog</button></div>
+  <div id="secCobranca">
   <div class="filters" id="filtros11">
     <div class="ms" id="msTipoD"><button type="button" class="msBtnD">Tipo ▾</button><div class="ms-panel"></div></div>
     <select class="fd" data-fd="dResp"></select>
@@ -410,6 +412,24 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
     <button id="btnCopiaDev" style="float:right;font-size:12px;padding:4px 10px">Copiar para o Teams</button>
     <button id="btnCopiaTxt" style="float:right;font-size:12px;padding:4px 10px;margin-right:6px">Copiar texto puro</button></h3>
     <textarea id="msgDev" readonly onclick="this.select()" style="width:100%;min-height:280px;background:#0a1729;color:#c9d6e5;border:1px solid #1e3550;border-radius:8px;padding:10px;font-family:ui-monospace,Consolas,monospace;font-size:12px;line-height:1.5;resize:vertical"></textarea>
+  </div>
+  </div>
+  <div id="secBacklog" style="display:none">
+  <div class="filters" id="filtros9">
+    <div class="ms" id="msTipo"><button type="button" class="msBtnA">Tipo ▾</button><div class="ms-panel"></div></div>
+    <select class="fa" data-fa="aGrupo"></select>
+    <select class="fa" data-fa="aSt"></select>
+    <select class="fa" data-fa="aResp"></select>
+    <select class="fa" data-fa="aTag"></select>
+    <select class="fa" data-fa="aVer"></select>
+    <input class="fa" data-fa="aBusca" placeholder="Buscar por título ou ID" style="min-width:240px">
+    <button class="limparA">Limpar</button>
+  </div>
+  <div class="kpis" id="kpiAtiv"></div>
+  <div class="card"><h3>Atividades (<span id="cntAtiv"></span>)</h3>
+    <div class="tbl-wrap" style="max-height:76vh"><table id="tAtiv"></table></div>
+    <div class="note">Backlog do time no Azure DevOps: histórias, defeitos, problemas em produção, tarefas e casos de teste. A coluna Deploy é inferida pela data: mostra a primeira subida em produção posterior à conclusão do item. Itens concluídos antes do primeiro deploy registrado, ou que ainda não subiram, ficam sem versão. Fonte: export do board.</div>
+  </div>
   </div>
 </div>
 
@@ -834,12 +854,17 @@ function renderAtiv(){
 }
 
 // ---------- abas ----------
-const dropMais=document.getElementById('dropMais'),dropPanel=dropMais.querySelector('.tabmais-panel');
-dropMais.querySelector('.dropBtn').onclick=e=>{e.stopPropagation();dropPanel.classList.toggle('open')};
-document.addEventListener('click',e=>{if(!dropMais.contains(e.target))dropPanel.classList.remove('open')});
+const GRUPOS=[...document.querySelectorAll('.tabs .tabmais')];
+GRUPOS.forEach(g=>{const pn=g.querySelector('.tabmais-panel');
+ g.querySelector('.dropBtn').onclick=e=>{e.stopPropagation();
+  GRUPOS.forEach(o=>{if(o!==g)o.querySelector('.tabmais-panel').classList.remove('open')});
+  pn.classList.toggle('open')};});
+document.addEventListener('click',e=>{GRUPOS.forEach(g=>{if(!g.contains(e.target))g.querySelector('.tabmais-panel').classList.remove('open')})});
+const marcaGrupo=b=>GRUPOS.forEach(g=>{g.classList.toggle('ativo',g.contains(b));g.querySelector('.tabmais-panel').classList.remove('open')});
 /* abas restritas ao time interno: só aparecem para quem entrou com e-mail @nstech.com.br */
-const ABAS_INTERNAS=['p11','p9'];
-const ehInterno=()=>!!(typeof SESSAO!=='undefined'&&SESSAO&&/@nstech\.com\.br$/i.test(String(SESSAO.email||'').trim()));
+const ABAS_INTERNAS=['p11','p1'];
+const ehPreviaClaude=()=>/^cowork-artifact:/.test(location.protocol);
+const ehInterno=()=>ehPreviaClaude()||!!(typeof SESSAO!=='undefined'&&SESSAO&&/@nstech\.com\.br$/i.test(String(SESSAO.email||'').trim()));
 function aplicaAcesso(){
  const ok=ehInterno();
  ABAS_INTERNAS.forEach(p=>{
@@ -848,17 +873,17 @@ function aplicaAcesso(){
   const pg=document.getElementById(p);
   if(!ok&&pg&&pg.classList.contains('on')){
    pg.classList.remove('on');
-   const b1=document.querySelector('.tabs button[data-p="p1"]');
-   document.querySelectorAll('.tabs button[data-p]').forEach(x=>x.classList.toggle('on',x===b1));
-   document.getElementById('p1').classList.add('on');
-   const dm=document.getElementById('dropMais'); if(dm)dm.classList.remove('ativo');
-   render();}});}
+   const b0=document.querySelector('.tabs button[data-p="p0"]');
+   document.querySelectorAll('.tabs button[data-p]').forEach(x=>x.classList.toggle('on',x===b0));
+   document.getElementById('p0').classList.add('on');
+   document.querySelectorAll('.tabs .tabmais').forEach(g=>g.classList.remove('ativo'));
+   render();}});
+ document.querySelectorAll('.tabs .grupoInterno').forEach(g=>g.style.display=ok?'':'none');}
 document.querySelectorAll('.tabs button[data-p]').forEach(b=>b.onclick=()=>{
   if(ABAS_INTERNAS.indexOf(b.dataset.p)>=0&&!ehInterno())return;
   document.querySelectorAll('.tabs button[data-p]').forEach(x=>x.classList.toggle('on',x===b));
   document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p.id===b.dataset.p));
-  dropMais.classList.toggle('ativo',dropPanel.contains(b));
-  dropPanel.classList.remove('open');
+  marcaGrupo(b);
   render();});
 
 // ---------- filtros (clonados nas paginas 2 e 4) ----------
@@ -895,7 +920,7 @@ function sincroniza(){
     h.querySelectorAll('.ms-panel input').forEach(i=>i.checked=stSel.has(i.value));
     b.textContent='Status: '+(stSel.size===0||stSel.size===stOpts.length?'todos':stSel.size===1?[...stSel][0]:stSel.size+' selecionados')+' ▾';});
 }
-['filtros1','filtros3','filtros6'].forEach(i=>montaFiltros(document.getElementById(i)));
+['filtros1','filtros6'].forEach(i=>{const h=document.getElementById(i);if(h)montaFiltros(h);});
 montaFiltros(document.getElementById('filtros2'));montaFiltros(document.getElementById('filtros4'));montaFiltros(document.getElementById('filtros5'));sincroniza();
 const filtrar=()=>DATA.filter(d=>(!F.fSit||(F.fSit==='aberto'?d.aberto:!d.aberto))&&(stSel.size===0||stSel.has(d.status))
  &&(!F.fTec||d.tecnico===F.fTec)&&(!F.fSolic||d.requerente===F.fSolic)&&(!F.fInst||d.instancia===F.fInst)&&(!F.fNivel||d.nivel===F.fNivel)&&(!F.fPrio||d.prioridade===F.fPrio)&&(!F.fCausa||d.causa===F.fCausa)&&(!F.fTema||d.tema===F.fTema)&&(!F.fModulo||(d.modulo||'—')===F.fModulo)
@@ -910,6 +935,11 @@ const rot=w=>{const d=new Date(w+'T00:00'),f=new Date(d);f.setDate(d.getDate()+6
  const p=x=>String(x.getDate()).padStart(2,'0')+'/'+String(x.getMonth()+1).padStart(2,'0');return p(d)+'–'+p(f)};
 let manha=true;
 
+/* Desenvolvimento: Cobrança (Problemas em prod) ou Backlog (board completo) */
+document.querySelectorAll('#segDev button').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('#segDev button').forEach(x=>x.classList.toggle('on',x===b));
+ ['secCobranca','secBacklog'].forEach(id=>document.getElementById(id).style.display=id===b.dataset.s?'':'none');
+ render();});
 // ================= P0 (início) =================
 const URL_DOC='https://teamsite.maerskgroup.com/teams/MaerskandNstech/Shared%20Documents/Forms/AllItems.aspx?id=%2Fteams%2FMaerskandNstech%2FShared%20Documents%2FMaersk%20and%20Nstech%2FDocumenta%C3%A7%C3%A3o&viewid=d57df6d2%2Dbb01%2D4836%2D848e%2De38c3895aae3&csf=1&CID=1bea736a%2D1d03%2D4e00%2D959a%2D13466d472a3b&FolderCTID=0x0120007A8C889BB587074FB1F406B84DEDE548';
 /* leva para uma aba já com os filtros aplicados */
@@ -972,11 +1002,11 @@ function renderHome(){
  }
  document.getElementById('acaoHome').innerHTML=
   cartao(critSemTec.length,'Críticos sem técnico',critSemTec.length?'alerta':'ok','critsemtec')
- +cartao(semTec.length,'Sem técnico',semTec.length?'aviso':'ok','semtec')
+ +cartao(semTec.length-critSemTec.length,'Outros sem técnico',(semTec.length-critSemTec.length)?'aviso':'ok','semtec')
  +cartao(estourado.length,'Prazo de SLA estourado',estourado.length?'alerta':'ok','estourado')
  +cartao(semCausa.length,'Resolvidos sem causa (7 dias)',semCausa.length?'aviso':'ok','semcausa')
  +cartao(velhos.length,'Abertos há mais de 30 dias',velhos.length?'aviso':'ok','velhos')
- +cartao(pend.length,'Pendentes com o cliente','','pend');
+ +cartao(pend.length,'Aguardando o cliente','neutro','pend');
  document.querySelectorAll('#acaoHome .acao').forEach(b=>b.onclick=()=>{
   const a=b.dataset.ac;
   if(a==='critsemtec')irPara('p2',{fSit:'aberto',fTec:'Não atribuído',fPrio:'Critica'});
@@ -1198,12 +1228,8 @@ function renderCausas(){
  const falha=pre.filter(d=>d.causa.startsWith('Falha')).length;
  const usu=pre.filter(d=>d.causa==='Erros de usuário'||d.causa==='Dúvidas').length;
  kpiHTML('kpiCausa',[
-  ['Causa preenchida',f.length?Math.round(pre.length/f.length*100)+'%':'—','acc'],
-  ['Nos resolvidos',rs.length?Math.round(preRs.length/rs.length*100)+'%':'—'],
-  ['Sem causa',f.length-pre.length,'wrn'],
   ['Falha da aplicação',pre.length?falha+' ('+Math.round(falha/pre.length*100)+'%)':'—'],
-  ['Usuário / dúvida',pre.length?usu+' ('+Math.round(usu/pre.length*100)+'%)':'—'],
-  ['Com justificativa',f.filter(d=>d.justificativa).length]]);
+  ['Usuário / dúvida',pre.length?usu+' ('+Math.round(usu/pre.length*100)+'%)':'—']]);
  const COR={'Falha na aplicação - Produto':'#e02424','Falha na aplicação - Infra':'#ff7a29','Falha na aplicação - Projeto':'#e0479e',
   'Erros de usuário':'#ff9f1c','Dúvidas':'#00b8d9','Requisições':'#2f6fed','Não preenchida':'#4a5f7a'};
  /* ---- resolvidos recentes sem causa ---- */
@@ -1897,9 +1923,11 @@ function renderAcoes(){
 
 function render(){const p=document.querySelector('.page.on').id;
  if(p==='p0')return renderHome();
- if(p==='p10')return renderAcoes();
- if(p==='p9')return ehInterno()?renderAtiv():aplicaAcesso();
- if(p==='p11')return ehInterno()?renderDev():aplicaAcesso();
+ if(p==='p11'){if(!ehInterno())return aplicaAcesso();
+  return document.getElementById('secBacklog').style.display==='none'?renderDev():renderAtiv();}
+ if(p==='p1'&&!ehInterno())return aplicaAcesso();
+ if(p==='p6'){renderSnap();renderHist();return;}
+ if(p==='p5'){renderCausas();renderAcoes();return;}
  if(p==='p8')return renderDeploys();
  if(p==='p1')renderCliente();else if(p==='p2')renderFila();else if(p==='p3')renderHist();else if(p==='p5')renderCausas();else if(p==='p6')renderSnap();else if(p==='p7')renderPlantao();else renderTabela();}
 function cabecalho(){const dsx=DATA.map(d=>d.abertura).filter(Boolean).sort();
