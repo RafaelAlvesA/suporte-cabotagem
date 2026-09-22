@@ -638,14 +638,16 @@ function renderDev(){
   ['Concluídos',g('Concluído')],['Devs',devs.size],
   ['Sem responsável',f.filter(x=>x.resp==='Não atribuído').length]]);
  document.getElementById('cntDev').textContent=f.length;
- const COLS=[['id','ID'],['tipo','Tipo'],['titulo','Título'],['ch','Chamado'],['rota','Tela'],
+ const COLS=[['id','ID'],['prio','Prioridade'],['tipo','Tipo'],['titulo','Título'],['ch','Chamado'],['rota','Tela'],
    ['resp','Dev'],['gr','Situação'],['st','Estado'],['idade','Idade'],['prev','Previsão'],['iter','Sprint'],['fim','Concluído em'],['dep','Deploy']];
- const val=x=>ordD==='dep'?((deployDe(x)||{}).ini||''):ordD==='id'?+x.id:ordD==='idade'?(idadeCard(x)==null?-1:idadeCard(x)):(x[ordD]||'');
+ const val=x=>ordD==='dep'?((deployDe(x)||{}).ini||''):ordD==='id'?+x.id:ordD==='idade'?(idadeCard(x)==null?-1:idadeCard(x)):ordD==='prio'?pesoPrio(x):(x[ordD]||'');
  const s=[...f].sort(comparador(val,dirD));
  document.getElementById('tDev').innerHTML='<thead><tr>'+COLS.map(([k,r])=>
    `<th data-k="${k}" style="cursor:pointer">${r}${ordD===k?(dirD>0?' ▲':' ▼'):''}</th>`).join('')+'</tr></thead><tbody>'+
   s.map(x=>{const c=chamadoDoCard(x);
-   return `<tr><td>${linkWi(x.id)}</td><td>${x.tipo}</td><td>${x.titulo.replace(/</g,'&lt;')}</td>
+   return `<tr><td>${linkWi(x.id)}</td>
+   <td>${(()=>{const p=prioDoCard(x);return p==='S/P'?'<span style="color:#4a5f7a">—</span>':tagPrio(p);})()}</td>
+   <td>${x.tipo}</td><td>${x.titulo.replace(/</g,'&lt;')}</td>
    <td>${c?linkId(c.id)+' <span class="tag '+(c.aberto?'op':'nu')+'">'+c.status+'</span>'+(x.chsrc==='carga'?' <span class="tag nu" title="ligado pela carga '+x.carga+'">via carga</span>':'')
         :x.ch?linkId(x.ch):'<span style="color:#4a5f7a">—</span>'}</td>
    <td>${x.rota?'<span class="tag nu">'+x.rota+'</span>':'<span style="color:#4a5f7a">—</span>'}</td>
@@ -742,10 +744,10 @@ function csvDev(){
  const campo=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
  const f=filtraDev();
  const linhas=f.map(x=>{const c=chamadoDoCard(x),dp=deployDe(x);
-  return [x.id,x.tipo,x.titulo,x.ch||'',c?c.status:'',c?c.instancia:'',x.rota||'',x.resp,x.gr,x.st,
+  return [x.id,prioDoCard(x)==='S/P'?'':prioDoCard(x),x.tipo,x.titulo,x.ch||'',c?c.status:'',c?c.instancia:'',x.rota||'',x.resp,x.gr,x.st,
    x.ini?x.ini.slice(0,16):'',idadeCard(x)==null?'':idadeCard(x),
    x.prev?ddmmaa(x.prev):'',x.iter||'',x.fim?x.fim.slice(0,16):'',dp?dp.v:''].map(campo).join(';');});
- const csv='﻿'+['ID','Tipo','Titulo','Chamado','Status do chamado','Instancia','Tela','Dev','Situacao','Estado','Criado em','Idade (dias)','Previsao','Sprint','Concluido em','Deploy'].join(';')+'\n'+linhas.join('\n');
+ const csv='﻿'+['ID','Prioridade','Tipo','Titulo','Chamado','Status do chamado','Instancia','Tela','Dev','Situacao','Estado','Criado em','Idade (dias)','Previsao','Sprint','Concluido em','Deploy'].join(';')+'\n'+linhas.join('\n');
  const a=document.createElement('a');
  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
  a.download='time-dev.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);}
