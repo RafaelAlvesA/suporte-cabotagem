@@ -154,7 +154,7 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
       <button data-p="p7">Plantão</button>
     <button data-p="p11" id="abaTimeDev" style="display:none">Time dev</button>
       <button data-p="p10">Ações estruturais</button>
-      <button data-p="p9">Atividades</button>
+      <button data-p="p9" style="display:none">Atividades</button>
       <button data-p="p8">Atualizações</button>
     </div>
   </div>
@@ -684,8 +684,8 @@ function montaMsgDev(f){
   alvo.value=t+'\nNenhum card em aberto na seleção atual. Tudo o que está filtrado já foi concluído ou cancelado.';
   return;}
  const linha=x=>{
-  const dc=idadeCard(x);
-  return '*'+prioDoCard(x)+'* - #'+x.id+(dc!=null?'('+dc+' dias)':'')+' · '+x.titulo.replace(/\s+/g,' ').trim();};
+  const dc=idadeCard(x), p=prioDoCard(x);
+  return (p==='S/P'?'':'*'+p+'* - ')+'#'+x.id+(dc!=null?'('+dc+' dias)':'')+' · '+x.titulo.replace(/\s+/g,' ').trim();};
  const ordena=(a,b)=>{
   const pa=pesoPrio(a), pb=pesoPrio(b);
   if(pa!==pb)return pa-pb;
@@ -777,7 +777,7 @@ const dropMais=document.getElementById('dropMais'),dropPanel=dropMais.querySelec
 dropMais.querySelector('.dropBtn').onclick=e=>{e.stopPropagation();dropPanel.classList.toggle('open')};
 document.addEventListener('click',e=>{if(!dropMais.contains(e.target))dropPanel.classList.remove('open')});
 /* abas restritas ao time interno: só aparecem para quem entrou com e-mail @nstech.com.br */
-const ABAS_INTERNAS=['p11'];
+const ABAS_INTERNAS=['p11','p9'];
 const ehInterno=()=>!!(typeof SESSAO!=='undefined'&&SESSAO&&/@nstech\.com\.br$/i.test(String(SESSAO.email||'').trim()));
 function aplicaAcesso(){
  const ok=ehInterno();
@@ -1691,7 +1691,7 @@ function renderAcoes(){
 
 function render(){const p=document.querySelector('.page.on').id;
  if(p==='p10')return renderAcoes();
- if(p==='p9')return renderAtiv();
+ if(p==='p9')return ehInterno()?renderAtiv():aplicaAcesso();
  if(p==='p11')return ehInterno()?renderDev():aplicaAcesso();
  if(p==='p8')return renderDeploys();
  if(p==='p1')renderCliente();else if(p==='p2')renderFila();else if(p==='p3')renderHist();else if(p==='p5')renderCausas();else if(p==='p6')renderSnap();else if(p==='p7')renderPlantao();else renderTabela();}
