@@ -35,6 +35,7 @@ button{cursor:pointer}
 .tabmais-panel button:hover{background:rgba(127,127,127,.12)}
 .tabmais-panel button.on{color:var(--tx);background:rgba(255,61,3,.14)}
 .tabmais.ativo>.dropBtn{color:var(--tx);border-bottom-color:var(--ac)}
+.msBtnF.ativo{border-color:var(--ac);color:var(--tx)}
 h2.secao{font-size:15px;font-weight:600;margin:28px 0 14px;padding-top:18px;border-top:1px solid var(--line);color:var(--tx)}
 h2.secao span{font-size:12px;font-weight:500;color:var(--mut);margin-left:8px}
 .segs{display:inline-flex;gap:4px;padding:4px;background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:16px}
@@ -124,6 +125,7 @@ td.obs{white-space:pre-wrap;min-width:260px;word-break:break-word;font-size:12.5
 .ms{position:relative;display:inline-block}.ms>button{min-width:150px;text-align:left}
 .ms-panel{display:none;position:absolute;z-index:50;top:calc(100% + 4px);left:0;min-width:240px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
 .ms-panel.open{display:block}
+.msF .ms-panel{max-height:340px;overflow:auto}
 .ms-panel label{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:6px;font-size:13px;cursor:pointer;white-space:nowrap}
 .ms-panel label:hover{background:rgba(127,127,127,.12)}
 .ms-panel input{width:14px;height:14px;accent-color:var(--ac);padding:0;margin:0}
@@ -519,7 +521,7 @@ function clicavel(id,vals,campo){CLICK[id]={vals,campo};
   if(m.campo==='status'){ if(stSel.has(v)&&stSel.size===1)stSel=new Set(); else stSel=new Set([v]); }
   else if(m.campo==='horas'){ const igual=(String(F.fHmin)===String(v[0])&&(String(F.fHmax)===String(v[1])||(v[1]===null&&F.fHmax===''))); 
     F.fHmin=igual?'':v[0]; F.fHmax=igual?'':(v[1]===null?'':v[1]); }
-  else { F[m.campo]=(F[m.campo]===v?'':v); }
+  else { const cur=vals(F,m.campo); F[m.campo]=(cur.length===1&&cur[0]===String(v))?[]:[String(v)]; }
   sincroniza(); render();
  });}
 const resp={responsive:true,maintainAspectRatio:false},noLeg={plugins:{legend:{display:false}}};
@@ -591,9 +593,9 @@ function deployDe(x){
 const uniqA=(f)=>[...new Set(ATIV.map(x=>x[f]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt'));
 const uniqTag=()=>[...new Set([].concat(...ATIV.map(x=>x.tags)))].sort((a,b)=>a.localeCompare(b,'pt'));
 const filtraAtiv=()=>ATIV.filter(x=>
-  (tpSel.size===0||tpSel.has(x.tipo))&&(!FA.aGrupo||x.gr===FA.aGrupo)&&(!FA.aSt||x.st===FA.aSt)
-  &&(!FA.aResp||x.resp===FA.aResp)&&(!FA.aTag||x.tags.indexOf(FA.aTag)>=0)
-  &&(!FA.aVer||(FA.aVer==='-sem'?!deployDe(x):(deployDe(x)||{}).v===FA.aVer))
+  (tpSel.size===0||tpSel.has(x.tipo))&&temVal(FA,'aGrupo',x.gr)&&temVal(FA,'aSt',x.st)
+  &&temVal(FA,'aResp',x.resp)&&(!vals(FA,'aTag').length||vals(FA,'aTag').some(g=>x.tags.indexOf(g)>=0))
+  &&(!vals(FA,'aVer').length||vals(FA,'aVer').some(v=>v==='-sem'?!deployDe(x):(deployDe(x)||{}).v===v))
   &&(!FA.aBusca||(x.titulo+' '+x.id).toLowerCase().includes(FA.aBusca.toLowerCase())));
 const CLASSE_GR={'Concluído':'ok','Cancelado':'nu','Backlog':'nu','Em andamento':'op',
   'Em teste':'hi','Aguardando go live':'hi','Impedimento':'bad','Outro':'nu'};
@@ -605,9 +607,10 @@ function montaFiltrosAtiv(){
   if(k==='aResp')e.innerHTML='<option value="">Responsável: todos</option>'+uniqA('resp').map(v=>`<option>${v}</option>`).join('');
   if(k==='aTag')e.innerHTML='<option value="">Tag: todas</option>'+uniqTag().map(v=>`<option>${v}</option>`).join('');
   if(k==='aVer')e.innerHTML='<option value="">Deploy: todos</option>'+[...new Set(DEPLOYS.map(z=>z.v))].sort().map(v=>`<option>${v}</option>`).join('')+'<option value="-sem">Sem deploy identificado</option>';
+  if(e.tagName==='SELECT'){viraMulti(e,FA,k,renderAtiv);return;}
   e.value=FA[k];const h=()=>{FA[k]=e.value;renderAtiv()};e.oninput=h;e.onchange=h;});
  host.querySelector('.limparA').onclick=()=>{Object.keys(FA).forEach(k=>FA[k]=FA_PADRAO[k]);
-   host.querySelectorAll('.fa').forEach(e=>e.value=FA[e.dataset.fa]);
+   host.querySelectorAll('.fa').forEach(e=>e.value=FA[e.dataset.fa]);repintaMultis();
    tpSel=new Set(uniqA('tipo').filter(v=>v!=='Test Case'));
    msTipoSync();renderAtiv();};
  /* multipla escolha de tipo */
@@ -661,8 +664,8 @@ function tagPrev(x){
 function filtraDev(){
  return ATIV.filter(x=>
   (tpSelD.size===0||tpSelD.has(x.tipo))
-  &&(!FD.dResp||x.resp===FD.dResp)&&(!FD.dGrupo||x.gr===FD.dGrupo)
-  &&(!FD.dVinc||(FD.dVinc==='sim'?!!x.ch:!x.ch))
+  &&temVal(FD,'dResp',x.resp)&&temVal(FD,'dGrupo',x.gr)
+  &&(!vals(FD,'dVinc').length||vals(FD,'dVinc').some(v=>v==='sim'?!!x.ch:!x.ch))
   &&(!FD.dAberto||abertoCard(x))
   &&(!FD.dBusca||(x.titulo+' '+x.id+' '+(x.ch||'')).toLowerCase().includes(FD.dBusca.toLowerCase())));}
 function montaFiltrosDev(){
@@ -670,11 +673,12 @@ function montaFiltrosDev(){
  host.querySelectorAll('.fd').forEach(e=>{const k=e.dataset.fd;
   if(k==='dResp')e.innerHTML='<option value="">Dev: todos</option>'+uniqA('resp').map(v=>`<option>${v}</option>`).join('');
   if(k==='dGrupo')e.innerHTML='<option value="">Situação: todas</option>'+uniqA('gr').map(v=>`<option>${v}</option>`).join('');
+  if(e.tagName==='SELECT'){viraMulti(e,FD,k,renderDev);return;}
   e.value=FD[k];const h=()=>{FD[k]=e.value;renderDev()};e.oninput=h;e.onchange=h;});
  const chk=document.getElementById('chkAberto');
  if(chk){chk.checked=FD.dAberto;chk.onchange=()=>{FD.dAberto=chk.checked;renderDev();};}
  host.querySelector('.limparD').onclick=()=>{Object.keys(FD).forEach(k=>FD[k]=FD_PADRAO[k]);
-   host.querySelectorAll('.fd').forEach(e=>e.value=FD[e.dataset.fd]);
+   host.querySelectorAll('.fd').forEach(e=>e.value=FD[e.dataset.fd]);repintaMultis();
    if(chk)chk.checked=false;
    tpSelD=new Set(TIPO_DEV_PADRAO);msTipoDSync();renderDev();};
  const cx=document.getElementById('msTipoD'),pn=cx.querySelector('.ms-panel');
@@ -887,6 +891,33 @@ document.querySelectorAll('.tabs button[data-p]').forEach(b=>b.onclick=()=>{
   render();});
 
 // ---------- filtros (clonados nas paginas 2 e 4) ----------
+/* ===== múltipla escolha genérica: transforma um <select> de filtro num painel de checkboxes =====
+   o valor fica no objeto de estado como lista; string solta (vinda de atalho ou clique em gráfico) também vale */
+const vals=(o,k)=>Array.isArray(o[k])?o[k]:(o[k]===''||o[k]==null||o[k]===false?[]:[String(o[k])]);
+const temVal=(o,k,v)=>{const a=vals(o,k);return !a.length||a.indexOf(String(v))>=0;};
+function viraMulti(sel,estado,chave,aoMudar){
+ const esc=s=>String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+ const opts=[...sel.options], base=(opts[0]&&opts[0].value==='')?opts[0].textContent:'';
+ const rot=(base.split(':')[0]||chave).trim(), todos=((base.split(':')[1]||'todos').trim());
+ const itens=opts.filter(o=>o.value!=='');
+ const cx=document.createElement('div'); cx.className='ms msF'; cx.dataset.k=chave;
+ cx.innerHTML='<button type="button" class="msBtnF"></button><div class="ms-panel">'
+  +itens.map(o=>'<label><input type="checkbox" value="'+esc(o.value)+'">'+esc(o.textContent)+'</label>').join('')
+  +'<div class="ms-acts"><button type="button" class="a1">Todos</button><button type="button" class="a0">Nenhum</button></div></div>';
+ sel.replaceWith(cx);
+ const pn=cx.querySelector('.ms-panel'), bt=cx.querySelector('.msBtnF');
+ const pinta=()=>{const v=vals(estado,chave);
+  pn.querySelectorAll('input').forEach(i=>i.checked=v.indexOf(i.value)>=0);
+  const txt=(!v.length||v.length===itens.length)?todos:v.length===1?((itens.find(o=>o.value===v[0])||{textContent:v[0]}).textContent):v.length+' selecionados';
+  bt.textContent=rot+': '+txt+' ▾'; bt.classList.toggle('ativo',v.length>0&&v.length<itens.length);};
+ const muda=()=>{estado[chave]=[...pn.querySelectorAll('input:checked')].map(i=>i.value);pinta();aoMudar();};
+ bt.onclick=e=>{e.stopPropagation();document.querySelectorAll('.ms-panel.open').forEach(x=>{if(x!==pn)x.classList.remove('open')});pn.classList.toggle('open')};
+ document.addEventListener('click',e=>{if(!cx.contains(e.target))pn.classList.remove('open')});
+ pn.querySelectorAll('input').forEach(i=>i.onchange=muda);
+ pn.querySelector('.a1').onclick=()=>{pn.querySelectorAll('input').forEach(i=>i.checked=true);muda()};
+ pn.querySelector('.a0').onclick=()=>{pn.querySelectorAll('input').forEach(i=>i.checked=false);muda()};
+ cx._pinta=pinta; pinta(); return cx;}
+const repintaMultis=()=>document.querySelectorAll('.msF').forEach(c=>{if(c._pinta)c._pinta();});
 const F={fSit:'',fTec:'',fSolic:'',fInst:'',fNivel:'',fPrio:'',fCausa:'',fTema:'',fModulo:'',fSla:'',fHmin:'',fHmax:'',fBusca:''};let stSel=new Set();
 const stOpts=uniq('status');
 function montaFiltros(host){
@@ -909,24 +940,33 @@ function montaFiltros(host){
     if(k==='fCausa')e.innerHTML='<option value="">Causa: todas</option>'+uniq('causa').map(v=>`<option>${v}</option>`).join('');
     if(k==='fTema')e.innerHTML='<option value="">Tema: todos</option>'+uniq('tema').map(v=>`<option>${v}</option>`).join('');
     if(k==='fModulo')e.innerHTML='<option value="">Módulo: todos</option>'+uniq('modulo').map(v=>`<option>${v}</option>`).join('');
+    if(e.tagName==='SELECT'){viraMulti(e,F,k,()=>{sincroniza();render()});return;}
     e.value=F[k];const h=()=>{F[k]=e.value;sincroniza();render()};e.oninput=h;e.onchange=h;});
   host.querySelector('.limpar').onclick=()=>{Object.keys(F).forEach(k=>F[k]='');stSel=new Set();
     document.querySelectorAll('.ms-panel input').forEach(i=>i.checked=false);sincroniza();render()};
 }
 function sincroniza(){
+  repintaMultis();
   document.querySelectorAll('.filters').forEach(h=>{
     h.querySelectorAll('.f').forEach(e=>e.value=F[e.dataset.f]);
     const b=h.querySelector('.msBtn'); if(!b)return; /* as barras de Atividades e Time dev tem filtros proprios */
-    h.querySelectorAll('.ms-panel input').forEach(i=>i.checked=stSel.has(i.value));
+    h.querySelectorAll('.ms:not(.msF) .ms-panel input').forEach(i=>i.checked=stSel.has(i.value));
     b.textContent='Status: '+(stSel.size===0||stSel.size===stOpts.length?'todos':stSel.size===1?[...stSel][0]:stSel.size+' selecionados')+' ▾';});
 }
 ['filtros1','filtros6'].forEach(i=>{const h=document.getElementById(i);if(h)montaFiltros(h);});
 montaFiltros(document.getElementById('filtros2'));montaFiltros(document.getElementById('filtros4'));montaFiltros(document.getElementById('filtros5'));sincroniza();
-const filtrar=()=>DATA.filter(d=>(!F.fSit||(F.fSit==='aberto'?d.aberto:!d.aberto))&&(stSel.size===0||stSel.has(d.status))
- &&(!F.fTec||d.tecnico===F.fTec)&&(!F.fSolic||d.requerente===F.fSolic)&&(!F.fInst||d.instancia===F.fInst)&&(!F.fNivel||d.nivel===F.fNivel)&&(!F.fPrio||d.prioridade===F.fPrio)&&(!F.fCausa||d.causa===F.fCausa)&&(!F.fTema||d.tema===F.fTema)&&(!F.fModulo||(d.modulo||'—')===F.fModulo)
- &&(!F.fSla||(F.fSla==='ok'?d.sla===true:F.fSla==='venc'?(d.aberto&&d.prazo&&new Date(d.prazo.replace(' ','T'))<REF):d.sla===false))
- &&(F.fHmin===''||(d.horas!=null&&d.horas>=+F.fHmin))&&(F.fHmax===''||(d.horas!=null&&d.horas<=+F.fHmax))
- &&(!F.fBusca||[d.titulo,d.inc,d.modulo,d.id,d.requerente,d.descricao,d.causa,d.justificativa].join(' ').toLowerCase().includes(F.fBusca.toLowerCase())));
+const filtrar=()=>DATA.filter(d=>{
+ const sit=vals(F,'fSit');
+ if(sit.length&&!((sit.indexOf('aberto')>=0&&d.aberto)||(sit.indexOf('resolvido')>=0&&!d.aberto)))return false;
+ if(stSel.size&&!stSel.has(d.status))return false;
+ if(!temVal(F,'fTec',d.tecnico)||!temVal(F,'fSolic',d.requerente)||!temVal(F,'fInst',d.instancia)||!temVal(F,'fNivel',d.nivel)
+  ||!temVal(F,'fPrio',d.prioridade)||!temVal(F,'fCausa',d.causa)||!temVal(F,'fTema',d.tema)||!temVal(F,'fModulo',d.modulo||'—'))return false;
+ const sla=vals(F,'fSla');
+ if(sla.length&&!sla.some(x=>x==='ok'?d.sla===true:x==='venc'?(d.aberto&&d.prazo&&new Date(d.prazo.replace(' ','T'))<REF):d.sla===false))return false;
+ if(F.fHmin!==''&&!(d.horas!=null&&d.horas>=+F.fHmin))return false;
+ if(F.fHmax!==''&&!(d.horas!=null&&d.horas<=+F.fHmax))return false;
+ if(F.fBusca&&![d.titulo,d.inc,d.modulo,d.id,d.requerente,d.descricao,d.causa,d.justificativa].join(' ').toLowerCase().includes(F.fBusca.toLowerCase()))return false;
+ return true;});
 
 const kpiHTML=(el,arr)=>document.getElementById(el).innerHTML=arr.map(([l,v,c])=>`<div class="kpi ${c||''}"><div class="l">${l}</div><div class="v">${v}</div></div>`).join('');
 const seg=s=>{const d=new Date(s.replace(' ','T'));d.setDate(d.getDate()-((d.getDay()+6)%7));
