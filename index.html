@@ -1162,10 +1162,18 @@ function renderCliente(){
  const ordem=[['NOVO','Novo'],['EM ANÁLISE','Em análise'],
    ['COM DEV','Com dev'],['PENDENTES (MAERSK)','Pendente']];
  let txt=(manha?'Bom dia':'Boa tarde')+', Todos! Segue a visão quantitativa dos tickets de suporte na data de hoje, '+dt+':\n\n';
- const nAli=ab.filter(d=>/alian/i.test(d.instancia||'')).length, nTru=ab.filter(d=>/truck/i.test(d.instancia||'')).length;
- const nOut=ab.length-nAli-nTru;
- txt+='Total geral: '+ab.length+'\n  Aliança: '+nAli+' · Truck: '+nTru+(nOut?' · Outros: '+nOut:'')+'\n  nstech: '+ns.length+'  (novos '+novos+' · em análise '+atr+' · com dev '+pla+')\n';
- txt+='  Maersk (aguardando usuário): '+mk.length+'\n  Tickets com mais de 30 dias: '+v30+'\n\n';
+ /* divisão por instância em todas as linhas (pedido do Henri): Navegação e Truck, Outros só se houver */
+ const grupoInst=d=>/alian/i.test(d.instancia||'')?'Navegação':/truck/i.test(d.instancia||'')?'Truck':'Outros';
+ const partes=(lista,det)=>['Navegação','Truck','Outros'].map(g=>{
+   const l=lista.filter(d=>grupoInst(d)===g); if(!l.length&&g==='Outros')return '';
+   const st=s=>l.filter(d=>d.status===s).length;
+   return '     '+g+': '+l.length+(det&&l.length?'  (novos '+st('Novo')+' · em análise '+st('Em análise')+' · com dev '+st('Com dev')+')':'');}).filter(Boolean).join('\n')+'\n';
+ const velhos=ab.filter(d=>idade(d)>30);
+ const cont3=l=>['Navegação','Truck','Outros'].map(g=>[g,l.filter(d=>grupoInst(d)===g).length]).filter(([g,n])=>g!=='Outros'||n).map(([g,n])=>g+': '+n).join(' · ');
+ txt+='Total geral: '+ab.length+'\n  '+cont3(ab)+'\n\n';
+ txt+='  nstech: '+ns.length+'  (novos '+novos+' · em análise '+atr+' · com dev '+pla+')\n'+partes(ns,true);
+ txt+='  Maersk (aguardando usuário): '+mk.length+'\n'+partes(mk,false);
+ txt+='  Tickets com mais de 30 dias: '+v30+'\n'+partes(velhos,false)+'\n';
  txt+='Segue a análise qualitativa dos tickets de suporte:\n';
  ordem.forEach(([tit,st])=>{const g=ab.filter(d=>d.status===st).sort((a,b)=>idade(b)-idade(a));
   if(!g.length)return; txt+='\n'+tit+'\n';
