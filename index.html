@@ -225,6 +225,7 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
     <button type="button" class="dropBtn">Análise ▾</button>
     <div class="tabmais-panel">
       <button data-p="p6">Tendências</button>
+      <button data-p="p3">SLA</button>
       <button data-p="p5">Causa raiz</button>
       <button data-p="p8">Entregas</button>
     </div>
@@ -320,8 +321,10 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
     <div class="wrap" style="height:320px"><canvas id="cInstHist"></canvas></div></div>
   <div class="card"><h3>Registro diário</h3><div class="scroll tbl-wrap"><table id="tSnap"></table></div>
     <div class="note" id="notaSnap"></div></div>
+</div>
 
-  <h2 class="secao">Fluxo semanal e SLA</h2>
+<div class="page" id="p3">
+  <div class="filters" id="filtros3"></div>
   <div class="kpis" id="kpiHist"></div>
   <div class="card"><h3>Fluxo semanal <span style="text-transform:none;letter-spacing:0">· barras = resolvidos por
     <select id="wSplit" style="padding:3px 6px;font-size:12px"><option value="instancia" selected>instância</option><option value="tecnico">técnico</option><option value="causa">análise de causa</option><option value="prioridade">prioridade</option><option value="sla">SLA</option></select>
@@ -964,7 +967,7 @@ function sincroniza(){
     h.querySelectorAll('.ms:not(.msF) .ms-panel input').forEach(i=>i.checked=stSel.has(i.value));
     b.textContent='Status: '+(stSel.size===0||stSel.size===stOpts.length?'todos':stSel.size===1?[...stSel][0]:stSel.size+' selecionados')+' ▾';});
 }
-['filtros1','filtros6'].forEach(i=>{const h=document.getElementById(i);if(h)montaFiltros(h);});
+['filtros1','filtros3','filtros6'].forEach(i=>{const h=document.getElementById(i);if(h)montaFiltros(h);});
 montaFiltros(document.getElementById('filtros2'));montaFiltros(document.getElementById('filtros4'));montaFiltros(document.getElementById('filtros5'));sincroniza();
 const filtrar=()=>DATA.filter(d=>{
  const sit=vals(F,'fSit');
@@ -1164,16 +1167,12 @@ function renderCliente(){
  let txt=(manha?'Bom dia':'Boa tarde')+', Todos! Segue a visão quantitativa dos tickets de suporte na data de hoje, '+dt+':\n\n';
  /* divisão por instância em todas as linhas (pedido do Henri): Navegação e Truck, Outros só se houver */
  const grupoInst=d=>/alian/i.test(d.instancia||'')?'Navegação':/truck/i.test(d.instancia||'')?'Truck':'Outros';
- const partes=(lista,det)=>['Navegação','Truck','Outros'].map(g=>{
-   const l=lista.filter(d=>grupoInst(d)===g); if(!l.length&&g==='Outros')return '';
-   const st=s=>l.filter(d=>d.status===s).length;
-   return '     '+g+': '+l.length+(det&&l.length?'  (novos '+st('Novo')+' · em análise '+st('Em análise')+' · com dev '+st('Com dev')+')':'');}).filter(Boolean).join('\n')+'\n';
- const velhos=ab.filter(d=>idade(d)>30);
  const cont3=l=>['Navegação','Truck','Outros'].map(g=>[g,l.filter(d=>grupoInst(d)===g).length]).filter(([g,n])=>g!=='Outros'||n).map(([g,n])=>g+': '+n).join(' · ');
- txt+='Total geral: '+ab.length+'\n  '+cont3(ab)+'\n\n';
- txt+='  nstech: '+ns.length+'  (novos '+novos+' · em análise '+atr+' · com dev '+pla+')\n'+partes(ns,true);
- txt+='  Maersk (aguardando usuário): '+mk.length+'\n'+partes(mk,false);
- txt+='  Tickets com mais de 30 dias: '+v30+'\n'+partes(velhos,false)+'\n';
+ const velhos=ab.filter(d=>idade(d)>30);
+ txt+='Total geral: '+ab.length+'  |  '+cont3(ab)+'\n';
+ txt+='  nstech: '+ns.length+'  (novos '+novos+' · em análise '+atr+' · com dev '+pla+')  |  '+cont3(ns)+'\n';
+ txt+='  Maersk (aguardando usuário): '+mk.length+'  |  '+cont3(mk)+'\n';
+ txt+='  Tickets com mais de 30 dias: '+v30+'  |  '+cont3(velhos)+'\n\n';
  txt+='Segue a análise qualitativa dos tickets de suporte:\n';
  ordem.forEach(([tit,st])=>{const g=ab.filter(d=>d.status===st).sort((a,b)=>idade(b)-idade(a));
   if(!g.length)return; txt+='\n'+tit+'\n';
@@ -2121,7 +2120,8 @@ function render(){const p=document.querySelector('.page.on').id;
  if(p==='p0')return renderHome();
  if(p==='p11'){if(!ehInterno())return aplicaAcesso();
   return document.getElementById('secBacklog').style.display==='none'?renderDev():renderAtiv();}
- if(p==='p6'){renderSnap();renderHist();return;}
+ if(p==='p6'){renderSnap();return;}
+ if(p==='p3'){renderHist();return;}
  if(p==='p5'){renderCausas();renderAcoes();return;}
  if(p==='p8')return renderDeploys();
  if(p==='p1')renderCliente();else if(p==='p2')renderFila();else if(p==='p3')renderHist();else if(p==='p5')renderCausas();else if(p==='p6')renderSnap();else if(p==='p7')renderPlantao();else renderTabela();}
