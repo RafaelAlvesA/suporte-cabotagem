@@ -135,13 +135,19 @@ tr.det td{background:#0d1e30;color:var(--mut);font-size:12px;white-space:pre-wra
 .stpC svg{width:10px;height:10px}
 .stpSep{width:18px;height:2px;background:#24405f;border-radius:2px;flex:none}
 .mcCols{display:block}
-.dirPapel{background:#fff;color:#222;border-radius:12px;padding:16px 18px;margin-top:12px}
+.dirPapel{background:#fff;color:#222;border-radius:12px;padding:16px 18px;margin-top:12px;overflow:hidden}
+.dirTopo>div,.dirBaixo>div,.dirPar>div{min-width:0}.dirBox{width:100%}
 .dirTopo{display:grid;grid-template-columns:minmax(220px,.9fr) minmax(0,2.6fr) minmax(0,1.9fr);gap:16px;align-items:start}
 @media(max-width:1300px){.dirTopo{grid-template-columns:1fr}}
 .dirHi h2{margin:0 0 12px;font-size:21px;color:#111}.dirN{font-size:13.5px;font-weight:600;margin:6px 0;color:#111}.dirN span{color:#0f6fc6;font-size:20px;font-weight:600;margin-right:6px}
 .dirFonte{margin-top:30px;font-size:13px;color:#111}
 .dirT{text-align:center;font-size:11.5px;font-weight:700;color:#333}.dirP{text-align:center;font-size:10px;color:#444;margin-top:2px}
-.dirBox{position:relative}.dirRoscas{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.dirBox{position:relative}.dirRoscas{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}
+.dirRosca{display:flex;align-items:flex-start;gap:10px;margin-top:6px}.dirRoscas{display:flex!important;flex-direction:column;gap:18px}.dirPar{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}.dirDon{margin-top:14px}.dirDon{position:relative;width:118px;height:118px;flex:none}
+.dirLeg{border-collapse:collapse;font-size:10.5px;color:#222;flex:1;min-width:0}.dirLeg th{font-size:9.5px;color:#666;font-weight:600;text-align:right;padding:0 0 2px 6px}
+.dirLeg td{padding:1.5px 0 1.5px 6px;text-align:right;white-space:nowrap}.dirLeg td:first-child{text-align:left;padding-left:0;white-space:normal}
+.dirLeg i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:0}
+.dirLeg tfoot td{border-top:1px solid #ddd;font-weight:700;padding-top:3px}
 .dirBaixo{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:16px;margin-top:18px}@media(max-width:1000px){.dirBaixo{grid-template-columns:1fr}}
 .dirNums{display:flex;flex-wrap:wrap;gap:24px;margin-top:10px}.dirTab td,.dirTab th{font-size:12.5px;padding:3px 12px 3px 0;text-align:left}
 
@@ -393,10 +399,8 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
      <div class="dirFonte" id="dirFonte"></div></div>
     <div class="dirSem"><div class="dirT" id="dirTitulo"></div><div class="dirBox" style="height:380px"><canvas id="dirSem"></canvas></div></div>
     <div class="dirRoscas">
-     <div><div class="dirT">Closing causes full period</div><div class="dirP dirPerFull"></div><div class="dirBox" style="height:190px"><canvas id="dirFullG"></canvas></div></div>
-     <div><div class="dirT">Closing causes full period</div><div class="dirP dirPerFull"></div><div class="dirBox" style="height:190px"><canvas id="dirFullD"></canvas></div></div>
-     <div><div class="dirT">Closing causes last week</div><div class="dirP dirPerLw"></div><div class="dirBox" style="height:190px"><canvas id="dirLwG"></canvas></div></div>
-     <div><div class="dirT">Closing causes last week</div><div class="dirP dirPerLw"></div><div class="dirBox" style="height:190px"><canvas id="dirLwD"></canvas></div></div>
+     <div class="dirGrupo"><div class="dirT">Closing causes full period</div><div class="dirP dirPerFull"></div><div class="dirPar"><div class="dirRosca"><div class="dirDon"><canvas id="dirFullG"></canvas></div><table class="dirLeg" id="dirFullGTab"></table></div><div class="dirRosca"><div class="dirDon"><canvas id="dirFullD"></canvas></div><table class="dirLeg" id="dirFullDTab"></table></div></div></div>
+     <div class="dirGrupo"><div class="dirT">Closing causes last week</div><div class="dirP dirPerLw"></div><div class="dirPar"><div class="dirRosca"><div class="dirDon"><canvas id="dirLwG"></canvas></div><table class="dirLeg" id="dirLwGTab"></table></div><div class="dirRosca"><div class="dirDon"><canvas id="dirLwD"></canvas></div><table class="dirLeg" id="dirLwDTab"></table></div></div></div>
     </div>
    </div>
    <div class="dirBaixo">
@@ -2623,9 +2627,12 @@ const DIR_DET=[['Erros de usuário','User error','#156082'],['Requisições','Re
  ['Falha na aplicação - Terceiro','Application failure - Third-party','#000000'],['Falha na aplicação - Projeto','Application failure - Project','#c00000']];
 function dirAgrupa(c){const af=['Falha na aplicação - Produto','Falha na aplicação - Infra','Falha na aplicação - Terceiro','Falha na aplicação - Projeto'].reduce((s,k)=>s+(c[k]||0),0);
  return [['Application failure',af,'#4ea72e'],['User error',c['Erros de usuário']||0,'#156082'],['Requests',c['Requisições']||0,'#e97132'],['Questions',c['Dúvidas']||0,'#a02b93'],['Under analysis',c['Não preenchida']||0,'#a5a5a5']];}
-function dirRosca(id,itens){const vis=itens.filter(x=>x[1]>0);
+function dirRosca(id,itens){const vis=itens.filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]), tot=vis.reduce((a,x)=>a+x[1],0);
  chart(id,{type:'doughnut',data:{labels:vis.map(x=>x[0]),datasets:[{data:vis.map(x=>x[1]),backgroundColor:vis.map(x=>x[2]),borderColor:'#fff',borderWidth:1}]},
-  options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'bottom',labels:{color:'#333',boxWidth:9,font:{size:9.5}}},dirRotulos:{pular0:true}}},plugins:[dirRotulos]});}
+  options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{display:false}}}});
+ const t=document.getElementById(id+'Tab'); if(!t)return;
+ t.innerHTML='<thead><tr><th></th><th>Q</th><th>%</th></tr></thead><tbody>'+(vis.length?vis.map(x=>'<tr><td><i style="background:'+x[2]+'"></i>'+x[0]+'</td><td>'+x[1]+'</td><td>'+Math.round(x[1]/tot*100)+'%</td></tr>').join(''):'<tr><td colspan="3" style="color:#888">sem fechamentos</td></tr>')
+  +'</tbody>'+(vis.length?'<tfoot><tr><td>Total</td><td>'+tot+'</td><td>100%</td></tr></tfoot>':'');}
 function renderDiretoria(){
  const pg=document.getElementById('p13'); if(!pg)return;
  const S=dirSemanas(DIR_INST), rows=S.rows;
