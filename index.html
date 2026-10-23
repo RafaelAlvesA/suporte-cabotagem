@@ -135,6 +135,12 @@ tr.det td{background:#0d1e30;color:var(--mut);font-size:12px;white-space:pre-wra
 .stpC svg{width:10px;height:10px}
 .stpSep{width:18px;height:2px;background:#24405f;border-radius:2px;flex:none}
 .mcCols{display:block}
+.rejRes{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:12px}@media(max-width:700px){.rejRes{grid-template-columns:1fr}}
+.rejItem{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:#0d1e30;font-size:13px}
+.rejTop{display:flex;align-items:center;gap:8px;margin-bottom:4px}.rejCod{font-weight:700;font-size:15px;color:#ffc107}
+.rejMsg{font-weight:600;color:var(--tx);margin-bottom:8px}.rejLin{color:#c9d6e5;margin-bottom:5px;line-height:1.5}
+.rejDocs{margin-top:8px}.rejDocs a{display:inline-block;margin:3px 6px 0 0;padding:3px 9px;border-radius:7px;background:#16304a;color:#7aa7ff;text-decoration:none;font-size:12px}
+.rejCh{margin-top:6px;font-size:12px;color:var(--mut)}.rejCh a{color:#7aa7ff;text-decoration:none}
 .docTopo{margin:4px 0 14px}.docTab td{vertical-align:middle;font-size:13px}.docBaixar{display:inline-block;padding:5px 12px;border-radius:8px;background:#24476b;color:#fff;text-decoration:none;font-size:12.5px;font-weight:600}.docBaixar:hover{background:#2f5a86}
 .dirPer{font-size:12.5px;color:var(--mut);display:inline-flex;align-items:center;gap:6px}.dirPer input{padding:4px 8px;font-size:12.5px;color-scheme:dark}
 .dirPapel{background:#fff;color:#222;border-radius:12px;padding:16px 18px;margin-top:12px;overflow:hidden}
@@ -417,7 +423,7 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
   <details class="card" style="margin-top:14px"><summary style="cursor:pointer;color:#7aa7ff;font-size:13px">Números desta tela (para conferir com a planilha)</summary><div id="dirNums" class="dirNums"></div></details>
 </div>
 
-<!--DOCS--><div class="page" id="p14"><div class="docTopo"><div><h2 style="margin:0 0 4px">Documentação MultiTMS · Instância 1 (Navegação)</h2><div class="mut" style="font-size:13px">Detalhamento das telas e fluxos do sistema. Clique em Baixar PDF para salvar o documento.</div></div></div><div class="card"><h3>Fluxos e Processos (4)</h3><div class="tbl-wrap"><table class="docTab"><thead><tr><th>Documento</th><th>Páginas</th><th>Atualizado em</th><th></th></tr></thead><tbody><tr><td><b>CT-e</b></td><td class="mut">8 páginas</td><td class="mut">20/09/2026</td><td style="text-align:right"><a class="docBaixar" href="https://maerkscabotagem.com.br/documentacao/navegacao-ct-e.pdf" download="Detalhamento - CT-e.pdf" target="_blank" rel="noopener">Baixar PDF</a></td></tr><tr><td><b>Carga</b></td><td class="mut">36 páginas</td><td class="mut">20/09/2026</td><td style="text-align:right"><a class="docBaixar" href="https://maerkscabotagem.com.br/documentacao/navegacao-carga.pdf" download="Detalhamento - Carga.pdf" target="_blank" rel="noopener">Baixar PDF</a></td></tr><tr><td><b>Fatura</b></td><td class="mut">12 páginas</td><td class="mut">20/09/2026</td><td style="text-align:right"><a class="docBaixar" href="https://maerkscabotagem.com.br/documentacao/navegacao-fatura.pdf" download="Detalhamento - Fatura.pdf" target="_blank" rel="noopener">Baixar PDF</a></td></tr><tr><td><b>MDF-e</b></td><td class="mut">12 páginas</td><td class="mut">20/09/2026</td><td style="text-align:right"><a class="docBaixar" href="https://maerkscabotagem.com.br/documentacao/navegacao-mdf-e.pdf" download="Detalhamento - MDF-e.pdf" target="_blank" rel="noopener">Baixar PDF</a></td></tr></tbody></table></div></div><div class="card"><h3>Configurações (5)</h3><div class="tbl-wrap"><table class="docTab"><thead><tr><th>Documento</th><th>Páginas</th><th>Atualizado em</th><th></th></tr></thead><tbody><tr><td><b>Acordo de Faturamento</b></td><td class="mut">5 páginas</td><td class="mut">22/09/2026</td><td style="text-align:right"><a class="docBaixar" href="https://maerkscabotagem.com.br/documentacao/navegacao-acordo-de-faturamento.pdf" download="Detalhamento - Acordo de Faturamento.pdf" target="_blank" rel="noopener">Baixar PDF</a></td></tr><tr><td><b>Grupo de Pessoas</b></td><td class="mut">17 páginas</td><td class="mut">22/09/2026</td><td style="text-align:right"><a class="docBaixar" href="https://maerkscabotagem.com.br/documentacao/navegacao-grupo-de-pessoas.pdf" download="Detalhamento - Grupo de Pessoas.pdf" target="_blank" rel="noopener">Baixar PDF</a></td></tr><tr><td><b>Layout EDI</b></td><td class="mut">10 páginas</td><td class="mut">22/09/2026</td><td style="text-align:right"><a class="docBaixar" href="https://maerkscabotagem.com.br/documentacao/navegacao-layout-edi.pdf" download="Detalhamento - Layout EDI.pdf" target="_blank" rel="noopener">Baixar PDF</a></td></tr><tr><td><b>Pessoas</b></td><td class="mut">10 páginas</td><td class="mut">22/09/2026</td><td style="text-align:right"><a class="docBaixar" href="https://maerkscabotagem.com.br/documentacao/navegacao-pessoas.pdf" download="Detalhamento - Pessoas.pdf" target="_blank" rel="noopener">Baixar PDF</a></td></tr><tr><td><b>Tipo de Operação</b></td><td class="mut">6 páginas</td><td class="mut">20/09/2026</td><td style="text-align:right"><a class="docBaixar" href="https://maerkscabotagem.com.br/documentacao/navegacao-tipo-de-operacao.pdf" download="Detalhamento - Tipo de Operação.pdf" target="_blank" rel="noopener">Baixar PDF</a></td></tr></tbody></table></div></div></div><!--/DOCS-->
+<!--DOCS--><div class="page" id="p14"><div class="docTopo"><div><h2 style="margin:0 0 4px">Documentação MultiTMS · Instância 1 (Navegação)</h2><div class="mut" style="font-size:13px">Detalhamento das telas e fluxos do sistema. Clique em Baixar PDF para salvar o documento.</div></div></div><div class="card" id="rejCard"><h3>Consultar rejeição ou erro <span id="rejCnt" style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--mut);font-size:12px"></span></h3><input id="rejBusca" placeholder="Digite o código ou parte da mensagem (ex.: 799, E1235, tomador, CEP, estimatedArrivalDate)" style="width:100%;max-width:720px;margin-bottom:12px"><div id="rejRes" class="rejRes"></div></div><div class="card"><h3>Fluxos e Processos (4)</h3><div class="tbl-wrap"><table class="docTab"><thead><tr><th>Documento</th><th>Páginas</th><th>Atualizado em</th><th></th></tr></thead><tbody><tr><td><b>CT-e</b></td><td class="mut">8 páginas</td><td class="mut">20/09/2026</td><td style="text-align:right"><a class="docBaixar" href="https://maerkscabotagem.com.br/documentacao/navegacao-ct-e.pdf" download="Detalhamento - CT-e.pdf" target="_blank" rel="noopener">Baixar PDF</a></td></tr><tr><td><b>Carga</b></td><td class="mut">36 páginas</td><td class="mut">20/09/2026</td><td style="text-align:right"><a class="docBaixar" href="https://maerkscabotagem.com.br/documentacao/navegacao-carga.pdf" download="Detalhamento - Carga.pdf" target="_blank" rel="noopener">Baixar PDF</a></td></tr><tr><td><b>Fatura</b></td><td class="mut">12 páginas</td><td class="mut">20/09/2026</td><td style="text-align:right"><a class="docBaixar" href="https://maerkscabotagem.com.br/documentacao/navegacao-fatura.pdf" download="Detalhamento - Fatura.pdf" target="_blank" rel="noopener">Baixar PDF</a></td></tr><tr><td><b>MDF-e</b></td><td class="mut">12 páginas</td><td class="mut">20/09/2026</td><td style="text-align:right"><a class="docBaixar" href="https://maerkscabotagem.com.br/documentacao/navegacao-mdf-e.pdf" download="Detalhamento - MDF-e.pdf" target="_blank" rel="noopener">Baixar PDF</a></td></tr></tbody></table></div></div><div class="card"><h3>Configurações (5)</h3><div class="tbl-wrap"><table class="docTab"><thead><tr><th>Documento</th><th>Páginas</th><th>Atualizado em</th><th></th></tr></thead><tbody><tr><td><b>Acordo de Faturamento</b></td><td class="mut">5 páginas</td><td class="mut">22/09/2026</td><td style="text-align:right"><a class="docBaixar" href="https://maerkscabotagem.com.br/documentacao/navegacao-acordo-de-faturamento.pdf" download="Detalhamento - Acordo de Faturamento.pdf" target="_blank" rel="noopener">Baixar PDF</a></td></tr><tr><td><b>Grupo de Pessoas</b></td><td class="mut">17 páginas</td><td class="mut">22/09/2026</td><td style="text-align:right"><a class="docBaixar" href="https://maerkscabotagem.com.br/documentacao/navegacao-grupo-de-pessoas.pdf" download="Detalhamento - Grupo de Pessoas.pdf" target="_blank" rel="noopener">Baixar PDF</a></td></tr><tr><td><b>Layout EDI</b></td><td class="mut">10 páginas</td><td class="mut">22/09/2026</td><td style="text-align:right"><a class="docBaixar" href="https://maerkscabotagem.com.br/documentacao/navegacao-layout-edi.pdf" download="Detalhamento - Layout EDI.pdf" target="_blank" rel="noopener">Baixar PDF</a></td></tr><tr><td><b>Pessoas</b></td><td class="mut">10 páginas</td><td class="mut">22/09/2026</td><td style="text-align:right"><a class="docBaixar" href="https://maerkscabotagem.com.br/documentacao/navegacao-pessoas.pdf" download="Detalhamento - Pessoas.pdf" target="_blank" rel="noopener">Baixar PDF</a></td></tr><tr><td><b>Tipo de Operação</b></td><td class="mut">6 páginas</td><td class="mut">20/09/2026</td><td style="text-align:right"><a class="docBaixar" href="https://maerkscabotagem.com.br/documentacao/navegacao-tipo-de-operacao.pdf" download="Detalhamento - Tipo de Operação.pdf" target="_blank" rel="noopener">Baixar PDF</a></td></tr></tbody></table></div></div></div><!--/DOCS-->
 
 <div class="page" id="p1">
   <div class="filters" id="filtros1"></div>
@@ -2728,9 +2734,121 @@ document.querySelectorAll('#segDir button').forEach(b=>b.onclick=()=>{DIR_INST=b
  if(at)at.onchange=()=>{DIR_ATE=at.value;renderDiretoria();};
  if(pd)pd.onclick=()=>{DIR_DE='2026-06-01';DIR_ATE='';de.value='';at.value='';renderDiretoria();};})();
 
+/* ===================== CATÁLOGO DE REJEIÇÕES (aba Documentação) ===================== */
+/* montado a partir dos chamados do GLPI e da Documentação MultiTMS; d = [arquivo, página] */
+const REJ_DOC={carga:['navegacao-carga.pdf','Carga'],cte:['navegacao-ct-e.pdf','CT-e'],mdfe:['navegacao-mdf-e.pdf','MDF-e'],fatura:['navegacao-fatura.pdf','Fatura'],
+ pessoas:['navegacao-pessoas.pdf','Pessoas'],grupo:['navegacao-grupo-de-pessoas.pdf','Grupo de Pessoas'],edi:['navegacao-layout-edi.pdf','Layout EDI'],
+ tipo:['navegacao-tipo-de-operacao.pdf','Tipo de Operação'],acordo:['navegacao-acordo-de-faturamento.pdf','Acordo de Faturamento']};
+const REJ=[
+ {c:'E1235',o:'NFS-e (prefeitura · padrão nacional)',m:'Falha no esquema XML do DF-e',
+  a:'O XML da NFS-e saiu com um grupo que o esquema nacional não aceita, por exemplo o endereço do exterior (endExt) dentro do endereço nacional. Costuma vir do cadastro do tomador ou do destinatário (tipo Exterior, país ou endereço incompleto).',
+  f:'Conferir no cadastro de Pessoas o Tipo (Física, Jurídica ou Exterior), o País e o endereço do tomador e do destinatário. Se o cadastro estiver certo, abrir chamado: é ajuste no envio do TMS.',
+  d:[['pessoas',4],['carga',14]],ch:['2610220264','2609300551','2609170521','2608310568']},
+ {c:'E160',o:'NFS-e (prefeitura)',m:'Arquivo em desacordo com o XML Schema / CST de tributação federal com valor informado',
+  a:'Algum campo de tributo saiu fora do padrão da prefeitura, em geral CST de tributos federais (PIS/COFINS) ou valores que não deveriam ser informados.',
+  f:'Ver a Composição dos Impostos da carga (etapa Frete) e as flags de isenção de PIS/COFINS da Pessoa e do Grupo. Corrigir e reemitir.',
+  d:[['carga',26],['pessoas',5]],ch:['2609140779','2609180638','2608190960']},
+ {c:'E181',o:'NFS-e (prefeitura)',m:'Valor líquido da NFS-e informado incorretamente',
+  a:'O valor líquido não fecha com o valor do serviço menos as retenções (ISS, PIS/COFINS).',
+  f:'Conferir na etapa Frete os componentes, a alíquota de ISS e a regra de inclusão de ICMS. Recalcular o frete e reemitir.',
+  d:[['carga',25],['carga',27]],ch:['2609290667']},
+ {c:'E9992',o:'NFS-e (prefeitura)',m:'RPS rejeitado pelo sistema. Consulte o serviço ConsultarLoteRpsEnvio',
+  a:'A prefeitura recusou o lote sem detalhar o motivo, ou o lote ficou em processamento. Normalmente é instabilidade da prefeitura ou do integrador.',
+  f:'Aguardar e consultar o lote; se persistir, cancelar a carga e reemitir. Não reenviar várias vezes seguidas.',
+  d:[['carga',14]],ch:['2610090833','2609150139']},
+ {c:'E641',o:'NFS-e (prefeitura)',m:'Se o destinatário for diferente do tomador é necessário fornecer suas informações',
+  a:'O destinatário é outra pessoa e o cadastro dele não tem os dados exigidos pela prefeitura.',
+  f:'Completar o cadastro do destinatário em Pessoas (documento, endereço, inscrição municipal quando houver).',
+  d:[['pessoas',4]],ch:['2609160157']},
+ {c:'E0240',o:'NFS-e (prefeitura)',m:'O CEP informado para o endereço nacional do tomador não existe',
+  a:'O CEP do tomador está errado ou desatualizado no cadastro.',f:'Corrigir o CEP do tomador em Pessoas e reemitir.',
+  d:[['pessoas',4]],ch:['2608200743']},
+ {c:'E0910',o:'NFS-e (prefeitura)',m:'É obrigatório informar o destinatário quando o indicador do destinatário…',
+  a:'O indicador manda informar o destinatário, mas ele não foi enviado ou está incompleto.',f:'Conferir o destinatário da carga e o cadastro dele em Pessoas.',
+  d:[['pessoas',4]],ch:['2608140808']},
+ {c:'999 / INV0328',o:'NFS-e (integrador)',m:'Processo abortado: 999 - Rejeitado (mensagem genérica, ex.: TAG NATOP ou CMUN divergente)',
+  a:'Rejeição genérica: o integrador compara com a última nota autorizada e aponta campos diferentes (natureza da operação, município).',
+  f:'Comparar o XML rejeitado com a última nota autorizada do município. Verificar mudanças recentes no Tipo de Operação ou no cadastro da filial.',
+  d:[['tipo',4]],ch:['2610070805','2607230307']},
+ {c:'101 / INV0101',o:'NFS-e (integrador)',m:'Falha na estrutura do XML ou campos obrigatórios não preenchidos',
+  a:'Faltou algum campo obrigatório para o município.',f:'Ver qual campo o retorno aponta e completar no cadastro ou na carga.',
+  d:[['pessoas',4],['carga',14]],ch:['2607230307']},
+ {c:'799',o:'CT-e (SEFAZ)',m:'Identificação do tomador utilizada em outro papel no CT-e (CNPJ/CPF ou IE)',
+  a:'O tomador foi informado como "Outros", mas o CNPJ dele é o mesmo de outro participante (remetente, destinatário, expedidor ou recebedor). Nesse caso a SEFAZ exige indicar o tomador por esse papel.',
+  f:'No CT-e (ou CT-e Manual), indicar o tomador pelo papel correspondente. Ao duplicar um CT-e os participantes são copiados, então corrigir antes de reemitir.',
+  d:[['cte',3],['pessoas',4]],ch:['2610060518','2606210088']},
+ {c:'729',o:'CT-e (SEFAZ)',m:'NF-e de múltiplos emitentes informadas nos documentos transportados sem indicador',
+  a:'A carga tem notas de emitentes diferentes e o CT-e não foi montado para esse cenário.',
+  f:'Revisar as notas vinculadas na etapa NF-e e o rateio/participantes na etapa Frete (aba Configurações). Separar as cargas se necessário.',
+  d:[['carga',6],['carga',12]],ch:['2609020419']},
+ {c:'801',o:'CT-e (SEFAZ)',m:'CNPJ/CPF do destinatário do CT-e complementar deve ser igual ao do CT-e complementado',
+  a:'O destinatário da carga do complementar é diferente do destinatário do CT-e original.',
+  f:'Ajustar o destinatário para o mesmo do CT-e original antes de emitir o complementar.',
+  d:[['cte',3]],ch:['2610050139']},
+ {c:'232',o:'CT-e (SEFAZ)',m:'IE do destinatário não informada',
+  a:'O destinatário é contribuinte e o cadastro está sem Inscrição Estadual.',f:'Preencher a IE (ou marcar isento) no cadastro de Pessoas e reemitir.',
+  d:[['pessoas',4]],ch:['2606240456']},
+ {c:'930',o:'CT-e (SEFAZ)',m:'Chave de acesso da NF-e transportada muito antiga',
+  a:'A nota vinculada é antiga demais para o prazo aceito pela SEFAZ.',f:'Conferir se a NF-e correta foi vinculada na etapa NF-e; usar a nota atual da operação.',
+  d:[['carga',6]],ch:['2606240398']},
+ {c:'570',o:'CT-e (SEFAZ)',m:'CT-e a ser substituído não pode ter sido substituído / anulado',
+  a:'O CT-e já foi anulado ou substituído (ou ficou anulado gerencialmente no TMS) e a SEFAZ não aceita nova substituição.',
+  f:'Usar Sincronizar Documento para conferir o status real na SEFAZ. Se o TMS estiver diferente da SEFAZ, é preciso ajuste por script.',
+  d:[['cte',5],['carga',21]],ch:['2609300726']},
+ {c:'316',o:'CT-e (SEFAZ) · Reforma Tributária',m:'Alíquota do IBS da UF inválida',
+  a:'A alíquota de IBS estadual enviada no CT-e não é a esperada pela SEFAZ para a UF. As alíquotas vêm do cadastro Alíquota IVA (aba Alíquota Estadual) e da Regra Aplicação IVA aplicada à carga.',
+  f:'Conferir em Administrativo > Impostos > Alíquota IVA a alíquota de IBS da UF da operação e a Composição dos Impostos da carga (etapa Frete). Corrigir, recalcular o frete e reemitir.',
+  d:[['carga',26],['carga',25]],ch:[]},
+ {c:'733',o:'MDF-e / CIOT (ANTT)',m:'CNPJ do fornecedor do vale-pedágio inexistente na base da ANTT',
+  a:'O fornecedor do vale-pedágio informado não é uma fornecedora habilitada na ANTT.',f:'Na aba Vale Pedágio, informar o CNPJ da fornecedora do vale-pedágio (não o da transportadora).',
+  d:[['mdfe',6],['tipo',4]],ch:['2609230145']},
+ {c:'estimatedArrivalDate',o:'Integração NFTP (SAP)',m:'Falha na integração NFTP por estimatedArrivalDate (ETA)',
+  a:'A integração não encontrou a data prevista de chegada do navio para a carga.',
+  f:'Conferir o schedule da viagem (porto e terminal de destino com ETA), código RKST do porto e código do navio. Corrigir e reenviar uma vez pela rotina onde o CT-e foi emitido.',
+  d:[['carga',19]],ch:['2610090480','2607230193']},
+ {c:'Campos obrigatórios',o:'Integração NFTP / EMP (SAP)',m:'Campos obrigatórios não informados',
+  a:'Cadastro faltante: RKST do porto ou localidade, CMD ID da pessoa, código do navio, ou porto/terminal fora do schedule.',
+  f:'Corrigir o cadastro de origem e reenviar a integração. Corrigir o cadastro depois não reenvia sozinho.',
+  d:[['carga',19],['pessoas',6]],ch:[]},
+ {c:'Sem integração',o:'Integração (carga ou cancelamento)',m:'Não existem integrações disponíveis para esta carga',
+  a:'A etapa Integração não gerou nenhum envio. Só CT-es autorizados e cancelados geram integração; tipo de proposta e SVM próprio podem bloquear o NFTP.',
+  f:'Conferir a situação do CT-e e a configuração do NFTP (tipo de proposta). Se a integração devia existir, é preciso envio por script.',
+  d:[['carga',18],['carga',20]],ch:['2609210538','2609280925','2610130842']},
+ {c:'Carga já fechada',o:'Integração e-Cargo (AdicionarCarga)',m:'A carga informada já foi fechada, por isso não é possível adicionar um novo pedido',
+  a:'O e-Cargo reenviou a inclusão de pedido para uma carga que já foi criada e fechada no TMS.',
+  f:'Ver na auditoria da carga quantas chamadas AdicionarCarga chegaram e se a primeira teve sucesso.',
+  d:[['carga',3]],ch:['2608260588']},
+ {c:'Etapa 3 travada',o:'Carga (etapa Frete)',m:'Carga travada na etapa 3 / CT-es não são gerados (terminais não informados)',
+  a:'O pedido chegou do e-Cargo sem Terminal de Origem e Terminal de Destino. É a causa mais comum de erro de usuário na Navegação.',
+  f:'Voltar a carga para a etapa NF-e e completar os terminais em Editar Pedido. Se não for possível voltar, abrir chamado para retorno de etapa.',
+  d:[['carga',6],['carga',12]],ch:['2610210275','2609300334','2609241067','2609090950','2608190631']}
+];
+const rejNorm=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+function renderRej(){
+ const box=document.getElementById('rejRes'); if(!box)return;
+ const q=rejNorm(document.getElementById('rejBusca').value).trim(), termos=q.split(/\s+/).filter(Boolean);
+ if(!termos.length){box.innerHTML='';document.getElementById('rejCnt').textContent='· '+REJ.length+' rejeições catalogadas';return;}
+ const STOP=new Set(['de','da','do','das','dos','na','no','em','para','por','com','sem','nao','erro','rejeicao','rejeitado','cte','ct','e','o','a','os','as','um','uma','que','foi','esta','integrado','processo','abortado','mensagem','codigo','correcao']);
+ const cods=(q.match(/\be?\d{3,4}\b/g)||[]).map(x=>x.replace(/^e/,''));
+ const pal=termos.map(w=>w.replace(/[^a-z0-9]/g,'')).filter(w=>w.length>=3&&!STOP.has(w)&&!/^\d+$/.test(w));
+ const pont=r=>{
+  if(cods.length){const rc=rejNorm(r.c).replace(/[^0-9 ]/g,' ').split(/\s+/).filter(Boolean);return cods.some(c=>rc.indexOf(c)>=0)?10:0;}
+  const t=rejNorm([r.c,r.o,r.m,r.a].join(' '));const hit=pal.filter(w=>t.indexOf(w)>=0).length;
+  return hit>=Math.max(1,Math.ceil(pal.length*0.5))?hit:0;};
+ const l=REJ.map(r=>[r,pont(r)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
+ document.getElementById('rejCnt').textContent=l.length+' de '+REJ.length;
+ const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+ box.innerHTML=l.length?l.map(r=>'<div class="rejItem"><div class="rejTop"><span class="rejCod">'+esc(r.c)+'</span><span class="tag nu">'+esc(r.o)+'</span></div>'
+  +'<div class="rejMsg">'+esc(r.m)+'</div>'
+  +'<div class="rejLin"><b>O que significa:</b> '+esc(r.a)+'</div><div class="rejLin"><b>O que fazer:</b> '+esc(r.f)+'</div>'
+  +'<div class="rejDocs"><b>Documentação:</b> '+r.d.map(([k,p])=>'<a href="https://maerkscabotagem.com.br/documentacao/'+REJ_DOC[k][0]+'#page='+p+'" target="_blank" rel="noopener">'+REJ_DOC[k][1]+' · p. '+p+' ↗</a>').join(' ')+'</div>'
+  +'</div>').join('')
+  :'<div class="mut" style="padding:8px 0">Essa rejeição ainda não está catalogada'+(cods.length?' (código '+esc(cods.join(', '))+')':'')+'. Consulte a lista de documentos abaixo ou abra um chamado com o print do erro.</div>';}
+(()=>{const b=document.getElementById('rejBusca'); if(b)b.oninput=renderRej;})();
+
 function render(){const p=document.querySelector('.page.on').id;
  if(p==='p0')return renderHome();
- if(p==='p14')return;
+ if(p==='p14')return renderRej();
  if(p==='p13'){if(!ehLogado())return aplicaAcesso();return renderDiretoria();}
  if(p==='p11'){if(!ehInterno())return aplicaAcesso();
   return document.getElementById('secBacklog').style.display==='none'?renderDev():renderAtiv();}
