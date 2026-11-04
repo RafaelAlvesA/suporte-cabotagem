@@ -2650,6 +2650,12 @@ function dirSemanas(inst){
   const c=L.filter(d=>{if(d.aberto)return false;const x=dirData(d.solucao);if(!x)return false;const [y,k]=isoSemana(x);return y===ay&&k===w;}).length;
   rows.push({q:Math.min(4,Math.ceil(w/13)),w:'Week '+w,o,c,atual:w===aw});}
  let saldo=H.j0; rows.forEach((r,i)=>{if(i>0)saldo=saldo-r.c+r.o; r.b=saldo;});
+ /* semanas do GLPI: saldo = chamados em aberto no fim da semana (pega reaberturas); semana atual = abertos agora */
+ const seg0=new Date(REF);seg0.setHours(0,0,0,0);seg0.setDate(seg0.getDate()-((seg0.getDay()+6)%7));
+ rows.forEach((r,i)=>{if(r.hist)return;
+  if(r.atual){r.b=L.filter(d=>d.aberto).length;return;}
+  const fim=new Date(seg0);fim.setDate(seg0.getDate()-7*(rows.length-1-i)+7);
+  r.b=L.filter(d=>{const ab=dirData(d.abertura);if(!ab||ab>=fim)return false;const so=dirData(d.solucao);return d.aberto?true:!(so&&so<fim);}).length;});
  /* blocos de trimestre em sequência: a média do trimestre anterior vale para todas as semanas do bloco */
  const blocos=[];rows.forEach(r=>{const b=blocos[blocos.length-1];if(b&&b.q===r.q)b.rows.push(r);else blocos.push({q:r.q,rows:[r]});});
  const media=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:0;
@@ -2917,6 +2923,8 @@ async function supCarregar(tentou){
  }catch(e){console.warn('anotações não carregaram',e);}
  await supDados();}
 /* ===== dados do painel no Supabase (tabela painel_dados: chave -> jsonb) ===== */
+const ADMIN_DADOS=['rafael.angelos@nstech.com.br'];
+const ehAdmin=()=>ehPreviaClaude()||!!(SESSAO&&ADMIN_DADOS.includes(String(SESSAO.email||'').trim().toLowerCase()));
 const DADOS_CHAVES=['RAW','SNAP','PLANTAO','DEPLOYS','RELEASES','ATIV','ANALISES'];
 let DADOS_ORIGEM='html', DADOS_EM='';
 function aplicaDados(d){
@@ -2942,7 +2950,7 @@ async function supDados(tentou){
   aplicaDados(d); DADOS_ORIGEM='banco'; return true;
  }catch(e){console.warn('dados não carregaram',e);return false;}}
 async function supPublicar(d,tentou){
- if(!podeEditar()||!ehInterno())throw new Error('entre com um login @nstech para publicar');
+ if(!podeEditar()||!ehAdmin())throw new Error('só o administrador do painel pode publicar');
  const quem=(SESSAO&&SESSAO.email)||'';
  const corpo=DADOS_CHAVES.filter(k=>d[k]!==undefined).map(k=>({chave:k,dados:d[k],atualizado_por:quem,atualizado_em:new Date().toISOString()}));
  const r=await fetch(SUP.url+'/rest/v1/painel_dados?on_conflict=chave',
@@ -2976,7 +2984,7 @@ function marcaSessao(){
  atualizaGate();
  const q=document.getElementById('quemSou'), b=document.getElementById('btnLogin');
  if(typeof aplicaAcesso==='function')aplicaAcesso();
- {const bm=document.getElementById('btnMais'); if(bm&&typeof ehInterno==='function')bm.style.display=ehInterno()?'':'none';}
+ {const bm=document.getElementById('btnMais'); if(bm&&typeof ehInterno==='function')bm.style.display=(typeof ehAdmin==='function'&&ehAdmin())?'':'none';}
  if(!supOn()){q.textContent='';b.style.display='none';return;}
  if(SESSAO){q.textContent=SESSAO.email;b.textContent='Sair';}
  else{q.textContent='';b.textContent='Entrar para editar';}
@@ -3158,7 +3166,7 @@ function aplicar(txt,nome){
  try{
   if(/\.json$/i.test(nome)||/^\s*\{/.test(txt)){
    const d=JSON.parse(txt); aplicaDados(d); render();
-   if(!(podeEditar()&&ehInterno())){aviso('Dados carregados só nesta tela. Para publicar no banco, entre com um login @nstech.','info');return;}
+   if(!(podeEditar()&&ehAdmin())){aviso('Dados carregados só nesta tela. Só o administrador do painel publica no banco.','info');return;}
    aviso('Publicando no banco…','info');
    supPublicar(d).then(n=>{DADOS_ORIGEM='banco';aviso('Publicado: '+n+' blocos gravados, export do GLPI de '+d.RAW.ref+'. Quem entrar no painel já vê estes dados.','ok');})
     .catch(e=>aviso('Não publiquei: '+e.message,'err'));
