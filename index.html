@@ -499,6 +499,10 @@ h1{font-size:19px;margin:0 0 2px;font-weight:600;letter-spacing:-.2px}
     <div class="wrap" style="height:320px"><canvas id="cInstHist"></canvas></div></div>
   <div class="card"><h3>Registro diário</h3><div class="scroll tbl-wrap"><table id="tSnap"></table></div>
     <div class="note" id="notaSnap"></div></div>
+  <div class="card"><h3>Idade média dos chamados <span style="text-transform:none;letter-spacing:0">·
+    <select id="idadeTipo" style="padding:3px 6px;font-size:12px"><option value="aberto" selected>em aberto</option><option value="fechado">fechados</option></select> <span id="idadeSub"></span></span></h3>
+    <div class="wrap" style="height:320px"><canvas id="cIdade"></canvas></div>
+    <div class="note" id="idadeNota"></div></div>
 </div>
 
 <div class="page" id="p3">
@@ -1846,10 +1850,34 @@ function renderSnap(){
    datasets:insts2.map((x,i)=>({label:x,data:chaves.map(k=>gr.filter(y=>y.k===k&&y.i===x).length),backgroundColor:dim2==='sit'?CORSIT[x]:PAL[i%PAL.length]}))},
   options:{...resp,scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{precision:0}}},
    plugins:{legend:{position:'bottom'},rotulos:{on:true,somenteLinhas:true,segBar:true}}}});
+ /* ---- idade média dos abertos por dia ---- */
+ {const L=filtrar(), dt=x=>x?new Date(x.replace(' ','T')):null;
+  const fim=new Date(REF); fim.setHours(0,0,0,0);
+  let ini=new Date(lim); if(n>=9999){const ab=L.map(d=>dt(d.abertura)).filter(Boolean).sort((a,b)=>a-b);ini=ab.length?new Date(ab[0]):new Date(fim);ini.setHours(0,0,0,0);}
+  const dias=[]; for(const d=new Date(ini);d<=fim;d.setDate(d.getDate()+1))dias.push(new Date(d));
+  const grupos=[['Geral',()=>true,'#2f6fed'],['Aliança Navegação',d=>/alian/i.test(d.instancia||''),'#ff3d03'],['Maersk Truck',d=>/truck/i.test(d.instancia||''),'#21b573']];
+  const tipoId=document.getElementById('idadeTipo').value;
+  const mediaFech=(dia,f)=>{const corte=new Date(dia);corte.setDate(corte.getDate()+1);const de=new Date(corte);de.setDate(de.getDate()-7);
+    const fe=L.filter(f).filter(d=>{if(d.aberto)return false;const so=dt(d.solucao),a=dt(d.abertura);return so&&a&&so>=de&&so<corte;});
+    if(!fe.length)return null; return Math.round(fe.reduce((t,d)=>t+(dt(d.solucao)-dt(d.abertura))/864e5,0)/fe.length*10)/10;};
+  const media=(dia,f)=>{if(tipoId==='fechado')return mediaFech(dia,f);const corte=new Date(dia);corte.setDate(corte.getDate()+1);
+    const ref=dia.getTime()===fim.getTime()?REF:corte;
+    const ab=L.filter(f).filter(d=>{const a=dt(d.abertura);if(!a||a>=corte)return false;const so=dt(d.solucao);return d.aberto||!(so&&so<corte);});
+    if(!ab.length)return null; return Math.round(ab.reduce((t,d)=>t+(ref-dt(d.abertura))/864e5,0)/ab.length*10)/10;};
+  const ser=grupos.map(([nome,f,cor])=>({label:nome,data:dias.map(d=>media(d,f)),borderColor:cor,backgroundColor:cor,tension:.3,pointRadius:dias.length<=45?2:0,borderWidth:nome==='Geral'?3:2,spanGaps:true}));
+  const atual=ser[0].data[ser[0].data.length-1], prim=ser[0].data.find(v=>v!=null);
+  document.getElementById('idadeNota').textContent=tipoId==='fechado'
+   ?'Para cada dia, a média de dias entre abertura e solução dos chamados resolvidos nos 7 dias até aquele dia (janela móvel, para não oscilar com dias de poucos fechamentos). Usa o período escolhido acima e os filtros da página. Chamado reaberto sai da conta enquanto estiver aberto.'
+   :'Para cada dia, a média de dias desde a abertura dos chamados que estavam em aberto no fim daquele dia. Usa o período escolhido acima e os filtros da página. Chamado reaberto conta como aberto desde a abertura original.';
+  document.getElementById('idadeSub').textContent=atual==null?'':'· hoje '+String(atual).replace('.',',')+' dias'+(prim!=null&&dias.length>1?' ('+(atual-prim>=0?'+':'')+String(Math.round((atual-prim)*10)/10).replace('.',',')+' no período)':'');
+  chart('cIdade',{type:'line',data:{labels:dias.map(d=>String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')),datasets:ser},
+   options:{...resp,scales:{y:{beginAtZero:true,title:{display:true,text:'dias'}}},
+    plugins:{legend:{position:'bottom'},rotulos:{on:dias.length<=31,somenteLinhas:true},tooltip:{callbacks:{label:c=>c.dataset.label+': '+String(c.parsed.y).replace('.',',')+' dias'}}}}});}
  nota.textContent=glpiView
   ?'Recálculo ao vivo a partir do export atual do GLPI, respeitando os filtros da página. Serve para conferência e para recortes (por técnico, módulo, causa). Não altera o histórico consolidado.'
   :'Histórico consolidado: '+SNAP.length+' dias registrados. Nos dias vindos da planilha, nstech × Maersk é a contagem real do dia; nos dias reconstruídos do GLPI (marcados como est. na tabela) a divisão nstech × Maersk fica vazia de propósito, porque só o status do dia do export é real e estimá-la pelo status atual faria o passado mudar a cada importação. Os valores já gravados nunca são recalculados: importar um CSV acrescenta as datas que faltam e preenche apenas os campos que estavam vazios.';}
 document.getElementById('snapPer').onchange=renderSnap;
+document.getElementById('idadeTipo').onchange=renderSnap;
 document.getElementById('snapFonte').onchange=renderSnap;
 document.getElementById('instPer').onchange=renderSnap;
 document.getElementById('instDim').onchange=renderSnap;
