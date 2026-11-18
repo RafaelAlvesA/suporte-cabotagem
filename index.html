@@ -1746,7 +1746,9 @@ function serieGLPI(basef){
    mk:(d.aberto&&d.status==='Pendente')}));
  const out=[];
  for(let dia=new Date(ini); dia<=fim; dia.setDate(dia.getDate()+1)){
-  const corte=new Date(dia); corte.setHours(23,59,59,999);
+  let corte=new Date(dia); corte.setHours(23,59,59,999);
+  /* no dia do export, o retrato é o do horário do export (igual aos indicadores da fila) */
+  if(diaISO(dia)===diaISO(REF)&&REF<corte)corte=new Date(REF);
   const d0=new Date(dia); d0.setHours(0,0,0,0);
   let abertos=0,v30=0,novos=0,fech=0,mk=0;
   pre.forEach(x=>{
