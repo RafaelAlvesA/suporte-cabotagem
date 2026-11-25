@@ -139,6 +139,7 @@ tr.det td{background:#0d1e30;color:var(--mut);font-size:12px;white-space:pre-wra
 .rejItem{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:#0d1e30;font-size:13px}
 .rejTop{display:flex;align-items:center;gap:8px;margin-bottom:4px}.rejCod{font-weight:700;font-size:15px;color:#ffc107}
 .rejMsg{font-weight:600;color:var(--tx);margin-bottom:8px}.rejLin{color:#c9d6e5;margin-bottom:5px;line-height:1.5}
+.rejAreas{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px}.rejAreas button{padding:4px 11px;border-radius:16px;font-size:12px;border:1px solid var(--line);background:#0d1e30;color:#c9d6e5;cursor:pointer}.rejAreas button span{color:#8aa2bd;margin-left:3px}.rejAreas button.on{background:var(--ac);border-color:var(--ac);color:#fff}.rejAreas button.on span{color:#fff}
 .rejDocs{margin-top:8px}.rejDocs a{display:inline-block;margin:3px 6px 0 0;padding:3px 9px;border-radius:7px;background:#16304a;color:#7aa7ff;text-decoration:none;font-size:12px}
 .rejCh{margin-top:6px;font-size:12px;color:var(--mut)}.rejCh a{color:#7aa7ff;text-decoration:none}
 .docTopo{margin:4px 0 14px}.docTab td{vertical-align:middle;font-size:13px}.docBaixar{display:inline-block;padding:5px 12px;border-radius:8px;background:#24476b;color:#fff;text-decoration:none;font-size:12.5px;font-weight:600}.docBaixar:hover{background:#2f5a86}
@@ -2793,7 +2794,8 @@ document.querySelectorAll('#segDir button').forEach(b=>b.onclick=()=>{DIR_INST=b
 /* montado a partir dos chamados do GLPI e da Documentação MultiTMS; d = [arquivo, página] */
 const REJ_DOC={carga:['navegacao-carga.pdf','Carga'],cte:['navegacao-ct-e.pdf','CT-e'],mdfe:['navegacao-mdf-e.pdf','MDF-e'],fatura:['navegacao-fatura.pdf','Fatura'],
  pessoas:['navegacao-pessoas.pdf','Pessoas'],grupo:['navegacao-grupo-de-pessoas.pdf','Grupo de Pessoas'],edi:['navegacao-layout-edi.pdf','Layout EDI'],
- tipo:['navegacao-tipo-de-operacao.pdf','Tipo de Operação'],acordo:['navegacao-acordo-de-faturamento.pdf','Acordo de Faturamento']};
+ tipo:['navegacao-tipo-de-operacao.pdf','Tipo de Operação'],acordo:['navegacao-acordo-de-faturamento.pdf','Acordo de Faturamento'],
+ treino:['treinamento-ct-e.pdf','Treinamento CT-e (24 rejeições)']};
 const REJ=[
  {c:'E1235',o:'NFS-e (prefeitura · padrão nacional)',m:'Falha no esquema XML do DF-e',
   a:'O XML da NFS-e saiu com um grupo que o esquema nacional não aceita, por exemplo o endereço do exterior (endExt) dentro do endereço nacional. Costuma vir do cadastro do tomador ou do destinatário (tipo Exterior, país ou endereço incompleto).',
@@ -2841,8 +2843,8 @@ const REJ=[
   f:'Ajustar o destinatário para o mesmo do CT-e original antes de emitir o complementar.',
   d:[['cte',3]],ch:['2610050139']},
  {c:'232',o:'CT-e (SEFAZ)',m:'IE do destinatário não informada',
-  a:'O destinatário é contribuinte e o cadastro está sem Inscrição Estadual.',f:'Preencher a IE (ou marcar isento) no cadastro de Pessoas e reemitir.',
-  d:[['pessoas',4]],ch:['2606240456']},
+  a:'O destinatário é contribuinte e o CT-e saiu sem a Inscrição Estadual dele.',f:'Comparar o destinatário do pedido com o documento vinculado (Carga > NF-e > Editar Pedido) e confirmar a IE real com a área responsável. Corrigir o cadastro ou o participante de origem, conferir se o CT-e recebeu a atualização e reenviar. Não preencher ISENTO só para transmitir.',
+  d:[['treino',10],['pessoas',4]],ch:['2606240456']},
  {c:'930',o:'CT-e (SEFAZ)',m:'Chave de acesso da NF-e transportada muito antiga',
   a:'A nota vinculada é antiga demais para o prazo aceito pela SEFAZ.',f:'Conferir se a NF-e correta foi vinculada na etapa NF-e; usar a nota atual da operação.',
   d:[['carga',6]],ch:['2606240398']},
@@ -2854,6 +2856,98 @@ const REJ=[
   a:'A alíquota de IBS estadual enviada no CT-e não é a esperada pela SEFAZ para a UF. As alíquotas vêm do cadastro Alíquota IVA (aba Alíquota Estadual) e da Regra Aplicação IVA aplicada à carga.',
   f:'Conferir em Administrativo > Impostos > Alíquota IVA a alíquota de IBS da UF da operação e a Composição dos Impostos da carga (etapa Frete). Corrigir, recalcular o frete e reemitir.',
   d:[['carga',26],['carga',25]],ch:[]},
+ {c:'843',o:'CT-e (SEFAZ)',m:'Chave de acesso da NF-e com erro',
+  a:'A chave da NF-e vinculada à carga não confere com a nota original (digitação errada ou nota errada vinculada).',
+  f:'Em Carga > NF-e, comparar a chave do retorno com o XML original da NF-e. Corrigir o vínculo pelo Validar ou pela importação do XML, conferir o CT-e e reenviar. Se não houver opção para remover o vínculo, pedir apoio, sem adicionar a nota em duplicidade.',
+  d:[['treino',8]],ch:[]},
+ {c:'481',o:'CT-e (SEFAZ)',m:'IE do tomador não informada',
+  a:'A rejeição é sobre o participante definido como tomador do frete, que pode ser outra empresa que não o destinatário.',
+  f:'Em Carga > Frete > Geral, conferir quem está como Tomador e validar o cadastro e a condição fiscal dele com o fiscal. Quando aplicável, usar Atualizar Dados Gerais, conferir o CT-e e reenviar. Não copiar a IE de outro participante.',
+  d:[['treino',12],['pessoas',4]],ch:[]},
+ {c:'519',o:'CT-e (SEFAZ)',m:'CFOP não combina com a prestação (UF de início e término)',
+  a:'O CFOP não corresponde ao percurso: 5.xxx para mesma UF, 6.xxx para UFs diferentes e 7.358 para término no exterior; depois vem o enquadramento do tomador (5.351 a 5.359).',
+  f:'Conferir início e término reais da prestação e a filial emissora, e levar o cenário ao fiscal para validar o CFOP e a regra. Não mudar origem ou destino só para autorizar nem trocar o CFOP por tentativa.',
+  d:[['treino',14],['treino',15],['treino',16]],ch:[]},
+ {c:'675',o:'CT-e (SEFAZ)',m:'Valor do imposto não confere com os valores calculados',
+  a:'O imposto levado no CT-e diverge da base e da alíquota calculadas (frete revisto, componente alterado).',
+  f:'Em Carga > Frete > Ver Detalhes, comparar a Composição dos Impostos com Serviços e Impostos do CT-e. Levar a divergência ao fiscal e corrigir a origem; recalcular só depois de avaliar os componentes. Não zerar pedágio nem ajustar centavos para forçar a autorização.',
+  d:[['treino',18]],ch:[]},
+ {c:'204',o:'CT-e (SEFAZ)',m:'Duplicidade de CT-e',
+  a:'O CT-e já foi recebido pela SEFAZ (por exemplo, a conexão caiu no envio e houve nova tentativa).',
+  f:'Não criar outro documento. Em Autorizar CT-e em Lote, usar Sincronizar Documento para conferir a situação na SEFAZ. Se estiver autorizado, conferir status e protocolo; se houver divergência, pedir apoio antes de nova emissão.',
+  d:[['treino',20]],ch:[]},
+ {c:'203',o:'CT-e (SEFAZ)',m:'Emitente não habilitado para emissão de CT-e',
+  a:'A filial emissora não está habilitada na SEFAZ para emitir CT-e.',
+  f:'Conferir filial, CNPJ, IE, UF e habilitação fiscal. Pedir regularização ao fiscal ou cadastro; não trocar o emitente só para autorizar.',
+  d:[['treino',22]],ch:[]},
+ {c:'209',o:'CT-e (SEFAZ)',m:'IE do emitente inválida',
+  a:'A inscrição estadual da filial emissora tem formato ou dígito inconsistente.',
+  f:'Conferir IE e UF da filial no cadastro e no documento, corrigir na origem e transmitir novamente.',
+  d:[['treino',22]],ch:[]},
+ {c:'230',o:'CT-e (SEFAZ)',m:'IE do emitente não cadastrada',
+  a:'A IE da filial não consta na base da SEFAZ.',
+  f:'Encaminhar para validação cadastral da filial e reenviar só depois da regularização.',
+  d:[['treino',23]],ch:[]},
+ {c:'482',o:'CT-e (SEFAZ)',m:'IE do tomador isento fora do padrão',
+  a:'O tomador está indicado como isento, mas o campo IE não traz o literal ISENTO.',
+  f:'Conferir tomador, UF e indicador fiscal e confirmar se ele é realmente isento. Se o enquadramento for válido, ajustar o cadastro de origem conforme a regra.',
+  d:[['treino',23],['pessoas',4]],ch:[]},
+ {c:'617',o:'CT-e (SEFAZ)',m:'UF não admite tomador isento',
+  a:'A UF do tomador não aceita a condição de isento de IE informada.',
+  f:'Conferir UF, indicador de IE e cadastro oficial do tomador e pedir análise fiscal. Não inventar IE.',
+  d:[['treino',24],['pessoas',4]],ch:[]},
+ {c:'746',o:'CT-e (SEFAZ)',m:'Tipo de serviço incompatível com o tomador',
+  a:'Com transportadora como tomadora, em algumas relações o serviço normal não é aceito (subcontratação ou redespacho).',
+  f:'Conferir tomador, CNPJ-base, condição de ICMS e modalidade. Validar subcontratação ou redespacho com o fiscal antes de mudar o tipo de serviço.',
+  d:[['treino',24]],ch:[]},
+ {c:'524',o:'CT-e (SEFAZ)',m:'CFOP 5.932 ou 6.932 obrigatório',
+  a:'O início da prestação é em UF diferente da UF da filial emitente.',
+  f:'Conferir UF da filial emitente, UF de início e UF de término. Validar a regra 5.932/6.932 e corrigir o CFOP na origem.',
+  d:[['treino',25],['treino',15]],ch:[]},
+ {c:'908',o:'CT-e (SEFAZ)',m:'CFOP 5.932 ou 6.932 indevido',
+  a:'O início da prestação é na mesma UF da filial emissora, então 5.932/6.932 não se aplica.',
+  f:'Conferir UF da filial e local real de início. Usar o CFOP da prestação real, validado pelo fiscal.',
+  d:[['treino',25]],ch:[]},
+ {c:'527',o:'CT-e (SEFAZ)',m:'NF-e duplicada no CT-e',
+  a:'A mesma chave de NF-e aparece mais de uma vez nos documentos transportados.',
+  f:'Conferir as NF-e vinculadas na carga e a chave apontada no retorno. Remover o vínculo duplicado pelo procedimento permitido e conferir o CT-e.',
+  d:[['treino',26]],ch:[]},
+ {c:'693',o:'CT-e (SEFAZ)',m:'Documentos transportados não informados',
+  a:'O tipo de serviço exige documentos transportados e o grupo foi enviado vazio.',
+  f:'Conferir tipo de serviço e NF-e ou documentos associados à carga. Vincular os documentos corretos na origem e conferir o XML antes de reenviar.',
+  d:[['treino',26]],ch:[]},
+ {c:'521',o:'CT-e (SEFAZ)',m:'Documentos anteriores de transporte não informados',
+  a:'Subcontratação e redespacho exigem referência ao CT-e anterior.',
+  f:'Conferir o tipo de serviço e o CT-e anterior da prestação. Informar a referência correta na etapa de documentos anteriores (CT-e Anterior) e validar.',
+  d:[['treino',27]],ch:[]},
+ {c:'747',o:'CT-e (SEFAZ)',m:'Documentos anteriores em CT-e de serviço normal',
+  a:'Foi informado grupo de documentos anteriores num CT-e de serviço normal.',
+  f:'Conferir a modalidade da operação e os vínculos de CT-e anterior. Corrigir o tipo de serviço ou a referência conforme a prestação real.',
+  d:[['treino',27]],ch:[]},
+ {c:'531',o:'CT-e (SEFAZ)',m:'Valor a receber maior que o valor da prestação',
+  a:'O valor a receber ficou acima do total da prestação.',
+  f:'Conferir totais da prestação, frete, descontos e valor a receber. Revisar o cálculo na origem; não ajustar valores manualmente.',
+  d:[['treino',28]],ch:[]},
+ {c:'581',o:'CT-e (SEFAZ)',m:'Valor total da carga não informado',
+  a:'O modal exige o valor da carga e ele não foi enviado.',
+  f:'Conferir o valor da carga e os documentos de origem. Preencher ou corrigir o valor na origem e conferir o CT-e gerado.',
+  d:[['treino',28]],ch:[]},
+ {c:'676',o:'CT-e (SEFAZ)',m:'CFOP não é de prestação de serviço de transporte',
+  a:'O CFOP escolhido não corresponde a uma prestação de transporte.',
+  f:'Conferir CFOP, percurso, tipo de serviço e enquadramento do tomador. Encaminhar ao fiscal; não trocar por tentativa.',
+  d:[['treino',29],['treino',16]],ch:[]},
+ {c:'252',o:'CT-e (SEFAZ)',m:'Ambiente do CT-e diferente do ambiente de destino',
+  a:'Um CT-e de homologação ou produção foi enviado ao ambiente errado.',
+  f:'Conferir o ambiente no documento e a instância usada. Acionar configuração ou integração (suporte); nunca transmitir produção em homologação.',
+  d:[['treino',29]],ch:[]},
+ {c:'539',o:'CT-e (SEFAZ)',m:'Duplicidade de CT-e com diferença na chave de acesso',
+  a:'Já existe CT-e autorizado com o mesmo emitente, série e número, mas com outra chave.',
+  f:'Conferir a chave autorizada no retorno, número, série, protocolo e o documento no TMS. Sincronizar na SEFAZ e pedir apoio antes de qualquer nova emissão.',
+  d:[['treino',30]],ch:[]},
+ {c:'212',o:'CT-e (SEFAZ)',m:'Data de emissão posterior à data de recebimento',
+  a:'O horário de emissão está à frente do relógio da SEFAZ (fuso ou sincronismo do servidor).',
+  f:'Conferir data e hora do CT-e. Acionar suporte ou infra para revisar o relógio e a configuração de emissão.',
+  d:[['treino',30]],ch:[]},
  {c:'733',o:'MDF-e / CIOT (ANTT)',m:'CNPJ do fornecedor do vale-pedágio inexistente na base da ANTT',
   a:'O fornecedor do vale-pedágio informado não é uma fornecedora habilitada na ANTT.',f:'Na aba Vale Pedágio, informar o CNPJ da fornecedora do vale-pedágio (não o da transportadora).',
   d:[['mdfe',6],['tipo',4]],ch:['2609230145']},
@@ -2879,10 +2973,27 @@ const REJ=[
   d:[['carga',6],['carga',12]],ch:['2610210275','2609300334','2609241067','2609090950','2608190631']}
 ];
 const rejNorm=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+/* áreas do catálogo: botões acima da busca e nomes que podem ser digitados */
+const REJ_AREAS=[['CT-e',/^ct-?e/i,/^(ct-?e|cte|conhecimento)$/],['NFS-e',/^nfs-?e/i,/^(nfs-?e|nfse|nota de servico|prefeitura)$/],
+ ['MDF-e / CIOT',/mdf-?e|ciot/i,/^(mdf-?e|mdfe|ciot|antt|efrete)$/],['Integração',/^integra/i,/^(integracao|nftp|emp|sap|e-?cargo|integracoes)$/],['Carga',/^carga/i,/^(carga|cargas|frete)$/]];
+let REJ_AREA='';
+const rejAreaDe=r=>{const a=REJ_AREAS.find(x=>x[1].test(r.o));return a?a[0]:'Outros';};
+function rejChips(){
+ let el=document.getElementById('rejAreas');
+ if(!el){const inp=document.getElementById('rejBusca');if(!inp)return;el=document.createElement('div');el.id='rejAreas';el.className='rejAreas';inp.insertAdjacentElement('beforebegin',el);
+  el.onclick=e=>{const b=e.target.closest('button[data-a]');if(!b)return;REJ_AREA=REJ_AREA===b.dataset.a?'':b.dataset.a;renderRej();};}
+ el.innerHTML='<span class="mut" style="font-size:12px;margin-right:4px">Área:</span>'+[['','Todas',REJ.length],...REJ_AREAS.map(a=>[a[0],a[0],REJ.filter(r=>rejAreaDe(r)===a[0]).length])]
+  .map(([k,t,n])=>'<button data-a="'+k+'" class="'+(REJ_AREA===k?'on':'')+'">'+t+' <span>'+n+'</span></button>').join('');}
 function renderRej(){
  const box=document.getElementById('rejRes'); if(!box)return;
- const q=rejNorm(document.getElementById('rejBusca').value).trim(), termos=q.split(/\s+/).filter(Boolean);
- if(!termos.length){box.innerHTML='';document.getElementById('rejCnt').textContent='· '+REJ.length+' rejeições catalogadas';return;}
+ rejChips();
+ let q=rejNorm(document.getElementById('rejBusca').value).trim();
+ /* digitar só o nome de uma área (ex.: CT-e, NFS-e, CIOT) funciona como o botão */
+ let areaQ=''; {const a=REJ_AREAS.find(x=>x[2].test(q));if(a){areaQ=a[0];q='';}}
+ const area=areaQ||REJ_AREA;
+ const termos=q.split(/\s+/).filter(Boolean);
+ const base=area?REJ.filter(r=>rejAreaDe(r)===area):REJ;
+ if(!termos.length&&!area){box.innerHTML='';document.getElementById('rejCnt').textContent='· '+REJ.length+' rejeições catalogadas';return;}
  const STOP=new Set(['de','da','do','das','dos','na','no','em','para','por','com','sem','nao','erro','rejeicao','rejeitado','cte','ct','e','o','a','os','as','um','uma','que','foi','esta','integrado','processo','abortado','mensagem','codigo','correcao']);
  const cods=(q.match(/\be?\d{3,4}\b/g)||[]).map(x=>x.replace(/^e/,''));
  const pal=termos.map(w=>w.replace(/[^a-z0-9]/g,'')).filter(w=>w.length>=3&&!STOP.has(w)&&!/^\d+$/.test(w));
@@ -2890,8 +3001,8 @@ function renderRej(){
   if(cods.length){const rc=rejNorm(r.c).replace(/[^0-9 ]/g,' ').split(/\s+/).filter(Boolean);return cods.some(c=>rc.indexOf(c)>=0)?10:0;}
   const t=rejNorm([r.c,r.o,r.m,r.a].join(' '));const hit=pal.filter(w=>t.indexOf(w)>=0).length;
   return hit>=Math.max(1,Math.ceil(pal.length*0.5))?hit:0;};
- const l=REJ.map(r=>[r,pont(r)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
- document.getElementById('rejCnt').textContent=l.length+' de '+REJ.length;
+ const l=termos.length?base.map(r=>[r,pont(r)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).map(x=>x[0]):base.slice().sort((a,b)=>String(a.c).localeCompare(String(b.c),'pt',{numeric:true}));
+ document.getElementById('rejCnt').textContent=l.length+' de '+REJ.length+(area?' · '+area:'');
  const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
  box.innerHTML=l.length?l.map(r=>'<div class="rejItem"><div class="rejTop"><span class="rejCod">'+esc(r.c)+'</span><span class="tag nu">'+esc(r.o)+'</span></div>'
   +'<div class="rejMsg">'+esc(r.m)+'</div>'
